@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiblioSys - Sistema de Controle de Biblioteca</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    header {
+      background: rgba(44, 62, 80, 0.95);
+      color: #fff;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      background: rgba(52, 73, 94, 0.95);
+      padding: 1rem;
+      flex-wrap: wrap;
+    }
+
+    nav button {
+      background: linear-gradient(45deg, #2ecc71, #27ae60);
+      border: none;
+      color: #fff;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    nav button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      background: linear-gradient(45deg, #27ae60, #2ecc71);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    h2 {
+      margin-bottom: 1.5rem;
+      color: #2c3e50;
+      font-size: 1.8rem;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 0.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input, select, textarea {
+      padding: 0.8rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+
+    .btn-success { background: linear-gradient(45deg, #2ecc71, #27ae60); }
+    .btn-danger { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+    .btn-warning { background: linear-gradient(45deg, #f39c12, #e67e22); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background: linear-gradient(45deg, #34495e, #2c3e50);
+      color: #fff;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover {
+      background-color: #f8f9fa;
+      transform: scale(1.01);
+      transition: all 0.3s;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: end;
+    }
+
+    .search-bar input {
+      flex: 1;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    #messages {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .message {
+      padding: 1rem 1.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      opacity: 0;
+      animation: slideIn 0.3s forwards, slideOut 0.3s 2.7s forwards;
+    }
+
+    .message.success { background: #2ecc71; }
+    .message.error { background: #e74c3c; }
+    .message.warning { background: #f39c12; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(100%); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(100%); }
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .report-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      nav {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="messages"></div>
+
+  <header>
+    <h1>📚 BiblioSys</h1>
+    <p>Sistema de Controle de Biblioteca</p>
+  </header>
+
+  <nav>
+    <button onclick="showSection('books')">📖 Livros</button>
+    <button onclick="showSection('members')">👥 Membros</button>
+    <button onclick="showSection('loans')">📋 Empréstimos</button>
+    <button onclick="showSection('returns')">↩️ Devoluções</button>
+    <button onclick="showSection('overdues')">⚠️ Atrasos</button>
+    <button onclick="showSection('reports')">📊 Relatórios</button>
+  </nav>
+
+  <main>
+    <section id="books" class="card">
+      <h2>📖 Gerenciamento de Livros</h2>
+      
+      <form onsubmit="addBook(event)" class="form-grid">
+        <div class="form-group">
+          <label for="title">Título *</label>
+          <input type="text" id="title" required>
+        </div>
+        <div class="form-group">
+          <label for="author">Autor *</label>
+          <input type="text" id="author" required>
+        </div>
+        <div class="form-group">
+          <label for="category">Categoria</label>
+          <input type="text" id="category" placeholder="Ex: Literatura, Ficção">
+        </div>
+        <div class="form-group">
+          <label for="count">Quantidade *</label>
+          <input type="number" id="count" min="1" required>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-success">Adicionar Livro</button>
+        </div>
+      </form>
+
+      <div class="search-bar">
+        <div class="form-group" style="flex: 1;">
+          <label for="searchBook">Buscar Livros</label>
+          <input type="text" id="searchBook" placeholder="Título, autor ou categoria..." onkeyup="searchBooks()">
+        </div>
+        <div class="form-group">
+          <label for="availableFilter">Filtrar por</label>
+          <select id="availableFilter" onchange="searchBooks()">
+            <option value="">Todos</option>
+            <option value="available">Disponíveis</option>
+            <option value="unavailable">Indisponíveis</option>
+          </select>
+        </div>
+      </div>
+
+      <table id="booksTable">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Categoria</th>
+            <th>Qtd Total</th>
+            <th>Disponibilidade</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="members" class="card hidden">
+      <h2>👥 Cadastro de Membros</h2>
+      
+      <form onsubmit="addMember(event)" class="form-grid">
+        <div class="form-group">
+          <label for="memberName">Nome *</label>
+          <input type="text" id="memberName" required>
+        </div>
+        <div class="form-group">
+          <label for="memberContact">Contato *</label>
+          <input type="tel" id="memberContact" placeholder="(34) 99999-9999" required>
+        </div>
+        <div class="form-group">
+          <label for="memberEmail">E-mail</label>
+          <input type="email" id="memberEmail" placeholder="email@exemplo.com">
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-success">Cadastrar Membro</button>
+        </div>
+      </form>
+
+      <table id="membersTable">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Contato</th>
+            <th>E-mail</th>
+            <th>Empréstimos Ativos</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="loans" class="card hidden">
+      <h2>📋 Registrar Empréstimo</h2>
+      
+      <form onsubmit="addLoan(event)" class="form-grid">
+        <div class="form-group">
+          <label for="loanBook">Livro *</label>
+          <select id="loanBook" required>
+            <option value="">Selecione um livro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="loanMember">Membro *</label>
+          <select id="loanMember" required>
+            <option value="">Selecione um membro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-success">Registrar Empréstimo</button>
+        </div>
+      </form>
+
+      <h3 style="margin-top: 2rem; color: #2c3e50;">Histórico de Empréstimos</h3>
+      <table id="loansTable">
+        <thead>
+          <tr>
+            <th>Livro</th>
+            <th>Membro</th>
+            <th>Data Empréstimo</th>
+            <th>Data Devolução</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="returns" class="card hidden">
+      <h2>↩️ Registrar Devoluções</h2>
+      <p style="margin-bottom: 1.5rem; color: #666;">Clique em "Devolver" para registrar a devolução de um livro.</p>
+      
+      <table id="returnTable">
+        <thead>
+          <tr>
+            <th>Livro</th>
+            <th>Membro</th>
+            <th>Data Empréstimo</th>
+            <th>Data Limite</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="overdues" class="card hidden">
+      <h2>⚠️ Controle de Atrasos</h2>
+      <p style="margin-bottom: 1.5rem; color: #e74c3c; font-weight: bold;">
+        Livros com devolução em atraso aparecem destacados em vermelho.
+      </p>
+      
+      <table id="overduesTable">
+        <thead>
+          <tr>
+            <th>Livro</th>
+            <th>Membro</th>
+            <th>Data Limite</th>
+            <th>Dias em Atraso</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="reports" class="card hidden">
+      <h2>📊 Relatórios Gerenciais</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="bookLength">0</div>
+          <div class="stat-label">Total de Livros</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="memberLength">0</div>
+          <div class="stat-label">Membros Cadastrados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="activeLoans">0</div>
+          <div class="stat-label">Empréstimos Ativos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="overdueBooks">0</div>
+          <div class="stat-label">Livros em Atraso</div>
+        </div>
+      </div>
+
+      <div class="report-grid">
+        <div>
+          <h3 style="color: #2c3e50; margin-bottom: 1rem;">📚 Livros Mais Emprestados</h3>
+          <table id="mostBorrowedBooksTable">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Empréstimos</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        
+        <div>
+          <h3 style="color: #2c3e50; margin-bottom: 1rem;">👥 Usuários Mais Ativos</h3>
+          <table id="mostActiveUsersTable">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Empréstimos</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="client.js"></script>
+</body>
+</html>
