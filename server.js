@@ -310,7 +310,7 @@ app.get('/', (_, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.use((err, _, res) => {
+app.use((err, _, res, next) => {
   console.error(err.stack);
   res.status(500).json({error: 'Erro interno do servidor'});
 });
