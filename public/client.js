@@ -271,7 +271,7 @@ function updateOverduesTable()
       <tr style="background-color: #ffe6e6;">
         <td>${loan.bookTitle}</td>
         <td>${loan.memberName}</td>
-        <td>${loan.returnDate}</td>
+        <td>${new Date(loan.returnDate).toLocaleDateString("pt-BR")}</td>
         <td style="color: red;">${overdueDays} dias</td>
         <td><button onclick="returnLoan(${loan.id})" class="btn-return">Devolver</button></td>
       </tr>
@@ -437,8 +437,8 @@ function updateLoansTable()
       <tr ${rowStyle}>
         <td>${loan.bookTitle}</td>
         <td>${loan.memberName}</td>
-        <td>${loan.loanDate}</td>
-        <td>${loan.returnDate}</td>
+        <td>${new Date(loan.loanDate).toLocaleDateString("pt-BR")}</td>
+        <td>${new Date(loan.returnDate).toLocaleDateString("pt-BR")}</td>
         <td>${loan.status}</td>
       </tr>
     `;
@@ -463,8 +463,8 @@ function updateReturnTable()
       <tr ${rowStyle}>
         <td>${loan.bookTitle}</td>
         <td>${loan.memberName}</td>
-        <td>${loan.returnDate}</td>
-        <td>${loan.returnDate}</td>
+        <td>${new Date(loan.loanDate).toLocaleDateString("pt-BR")}</td>
+        <td>${new Date(loan.returnDate).toLocaleDateString("pt-BR")}</td>
         <td>
           <button onclick="returnLoan(${loan.id})" class="btn-return">
             Devolver
