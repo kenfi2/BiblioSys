@@ -202,8 +202,8 @@ app.post('/api/loans', async(req, res) => {
     memberId: parseInt(memberId),
     bookTitle: book.title,
     memberName: member.name,
-    loanDate: loanDate || hoje.toLocaleDateString(),
-    returnDate: returnDate || dataVencimento.toLocaleDateString(),
+    loanDate: loanDate || now.toLocaleDateString(),
+    returnDate: returnDate || dueDate.toLocaleDateString(),
     status: 'Active'
   };
 
@@ -260,7 +260,7 @@ app.get('/api/reservations', async(_, res) => {
   if(!db)
     return res.status(500).json({error: 'Erro ao acessar banco de dados'});
   
-  res.json(db.reservas);
+  res.json(db.reservations);
 });
 
 app.post('/api/reservations', async(req, res) => {
@@ -293,7 +293,7 @@ app.post('/api/reservations', async(req, res) => {
     bookId: parseInt(bookId),
     memberId: parseInt(memberId),
     bookTitle: book.title,
-    memberName: member.NAME,
+    memberName: member.name,
     reservationDate: new Date().toLocaleDateString(),
     status: 'Active'
   };
@@ -301,7 +301,7 @@ app.post('/api/reservations', async(req, res) => {
   db.reservations.push(reservation);
 
   if(await writeDatabase(db))
-    res.status(201).json(novaReserva);
+    res.status(201).json(reservation);
   else
     res.status(500).json({error: 'Erro ao criar reserva'});
 });

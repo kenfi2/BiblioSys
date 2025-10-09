@@ -93,8 +93,9 @@ function searchBooks()
     const matchTerm = book.title.toLowerCase().includes(term) || book.author.toLowerCase().includes(term) || book.category.toLowerCase().includes(term);
     if(filter === 'available')
       return matchTerm && book.available > 0;
-    if(filter === 'unavailable') return matchTermo && livro.disponivel === 0;
-      return matchTerm;
+    if(filter === 'unavailable')
+      return matchTerm && bool.available === 0;
+    return matchTerm;
   });
   
   updateBooksTable(filteredBooks);
