@@ -943,6 +943,63 @@
       `;
     }
 
+    function renderOverdues() {
+      if(!canAccess(['admin', 'manager', 'librarian']))
+        return '';
+
+      const overdueLoans = getOverdueLoans();
+
+      return `
+        <div class="card">
+          <h2>📅 Empréstimos em Atraso</h2>
+
+          ${overdueLoans.length === 0 ? `
+            <p style="text-align: center; color: #666; padding: 2rem;">
+              Nenhum empréstimo em atraso no momento.
+            </p>
+          ` : `
+            <table>
+              <thead>
+                <tr>
+                  <th>Livro</th>
+                  <th>Leitor</th>
+                  <th style="text-align: center;">Data Empréstimo</th>
+                  <th style="text-align: center;">Data Devolução</th>
+                  <th style="text-align: center;">Dias de Atraso</th>
+                  <th style="text-align: center;">Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${overdueLoans.map(loan => {
+                  const now = new Date();
+                  const returnDate = new Date(loan.returnDate);
+                  const toleranceDate = new Date(returnDate);
+                  toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
+
+                  const diffDays = Math.floor((now - toleranceDate) / (1000 * 60 * 60 * 24));
+
+                  return `
+                    <tr class="row-overdue">
+                      <td><strong>${loan.bookTitle}</strong></td>
+                      <td>${loan.memberName}</td>
+                      <td style="text-align: center;">${new Date(loan.loanDate).toLocaleDateString('pt-BR')}</td>
+                      <td style="text-align: center;">${new Date(loan.returnDate).toLocaleDateString('pt-BR')}</td>
+                      <td style="text-align: center;">
+                        <span class="badge badge-danger">${diffDays} dia(s)</span>
+                      </td>
+                      <td style="text-align: center;">
+                        <button onclick="handleReturnLoan(${loan.id})" class="btn btn-success btn-small">Registrar Devolução</button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          `}
+        </div>
+      `;
+    }
+
     function renderMainPage() {
       return `
         <header>
@@ -982,6 +1039,9 @@
               <button class="nav-btn ${currentSection === 'loans' ? 'active' : ''}" onclick="navigateTo('loans')">
                 📋 Empréstimos
               </button>
+              <button class="nav-btn ${currentSection === 'overdues' ? 'active' : ''}" onclick="navigateTo('overdues')">
+                ⏰ Atrasos
+              </button>
             ` : ''}
             ${canAccess(['admin', 'manager']) ? `
               <button class="nav-btn ${currentSection === 'staff' ? 'active' : ''}" onclick="navigateTo('staff')">
@@ -1013,6 +1073,7 @@
         case 'loans': return renderLoans();
         case 'staff': return renderStaff();
         case 'config': return renderConfig();
+        case 'overdues': return renderOverdues();
         default: return renderDashboard();
       }
     }
