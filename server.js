@@ -192,18 +192,14 @@ app.post('/api/loans', async(req, res) => {
   if(member.activeLoans >= 3)
     return res.status(400).json({error: 'Limite de empréstimos atingido'});
 
-  const now = new Date();
-  const dueDate = new Date(now);
-  dueDate.setDate(dueDate.getDate() + 14);
-
   const loan = {
     id: db.nextId.loans++,
     bookId: parseInt(bookId),
     memberId: parseInt(memberId),
     bookTitle: book.title,
     memberName: member.name,
-    loanDate: loanDate || now.toLocaleDateString(),
-    returnDate: returnDate || dueDate.toLocaleDateString(),
+    loanDate: loanDate,
+    returnDate: returnDate,
     status: 'Active'
   };
 
@@ -233,7 +229,7 @@ app.put('/api/loans/:id/return', async(req, res) => {
     return res.status(400).json({error: 'Empréstimo já foi devolvido'});
 
   loan.status = 'Devolvido';
-  loan.returnRealDate = new Date().toLocaleDateString();
+  loan.returnRealDate = new Date().toISOString();
 
   const book = db.books.find(book => book.id === loan.bookId);
   const member = db.members.find(member => member.id === loan.memberId);
@@ -294,7 +290,7 @@ app.post('/api/reservations', async(req, res) => {
     memberId: parseInt(memberId),
     bookTitle: book.title,
     memberName: member.name,
-    reservationDate: new Date().toLocaleDateString(),
+    reservationDate: new Date().toISOString(),
     status: 'Active'
   };
 
@@ -304,6 +300,31 @@ app.post('/api/reservations', async(req, res) => {
     res.status(201).json(reservation);
   else
     res.status(500).json({error: 'Erro ao criar reserva'});
+});
+
+app.put('/api/reservations/:id/cancel', async(req, res) => {
+  const reservationId = parseInt(req.params.id);
+  
+  if(!reservationId)
+    return res.status(400).json({ error: 'ID da reserva é obrigatório' });
+
+  const db = await readDatabase();
+  if(!db)
+    return res.status(500).json({ error: 'Erro ao acessar banco de dados' });
+
+  const reservation = db.reservations.find(r => r.id === reservationId);
+  if(!reservation)
+    return res.status(404).json({ error: 'Reserva não encontrada' });
+
+  if(reservation.status !== 'Active')
+    return res.status(400).json({ error: 'Só é possível cancelar reservas ativas' });
+
+  reservation.status = 'Cancelled';
+
+  if(await writeDatabase(db))
+    res.json(reservation);
+  else
+    res.status(500).json({ error: 'Erro ao cancelar reserva' });
 });
 
 app.get('/', (_, res) => {

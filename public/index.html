@@ -18,47 +18,195 @@
       color: #333;
     }
 
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 3rem;
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-header h1 {
+      font-size: 2.5rem;
+      color: #667eea;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .test-credentials {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    .test-credentials p {
+      margin: 0.3rem 0;
+    }
+
     header {
       background: rgba(44, 62, 80, 0.95);
-      color: #fff;
+      color: white;
       padding: 1.5rem;
-      text-align: center;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
-    header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-left h1 {
+      font-size: 2rem;
+    }
+
+    .header-left p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-info {
+      text-align: right;
+    }
+
+    .user-info p {
+      margin: 0.2rem 0;
     }
 
     nav {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
       background: rgba(52, 73, 94, 0.95);
       padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow-x: auto;
+    }
+
+    .nav-buttons {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 0.5rem;
       flex-wrap: wrap;
     }
 
-    nav button {
-      background: linear-gradient(45deg, #2ecc71, #27ae60);
+    .nav-btn {
+      background: #7f8c8d;
       border: none;
-      color: #fff;
+      color: white;
       padding: 0.8rem 1.5rem;
-      border-radius: 25px;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s;
       font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      white-space: nowrap;
     }
 
-    nav button:hover {
+    .nav-btn:hover {
+      background: #95a5a6;
       transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-      background: linear-gradient(45deg, #27ae60, #2ecc71);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(45deg, #667eea, #764ba2);
     }
 
     main {
@@ -68,119 +216,19 @@
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.95);
+      background: white;
       padding: 2rem;
       margin-bottom: 2rem;
       border-radius: 15px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-      backdrop-filter: blur(10px);
     }
 
-    h2 {
+    .card h2 {
       margin-bottom: 1.5rem;
       color: #2c3e50;
       font-size: 1.8rem;
-      border-bottom: 3px solid #3498db;
+      border-bottom: 3px solid #667eea;
       padding-bottom: 0.5rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    label {
-      margin-bottom: 0.5rem;
-      font-weight: bold;
-      color: #555;
-    }
-
-    input, select, textarea {
-      padding: 0.8rem;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.3s;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #3498db;
-      box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
-    }
-
-    .btn {
-      background: linear-gradient(45deg, #3498db, #2980b9);
-      color: #fff;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 25px;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-    }
-
-    .btn-success { background: linear-gradient(45deg, #2ecc71, #27ae60); }
-    .btn-danger { background: linear-gradient(45deg, #e74c3c, #c0392b); }
-    .btn-warning { background: linear-gradient(45deg, #f39c12, #e67e22); }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1.5rem;
-      background: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-      padding: 1rem;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-    }
-
-    th {
-      background: linear-gradient(45deg, #34495e, #2c3e50);
-      color: #fff;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    tr:hover {
-      background-color: #f8f9fa;
-      transform: scale(1.01);
-      transition: all 0.3s;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .search-bar {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      align-items: end;
-    }
-
-    .search-bar input {
-      flex: 1;
     }
 
     .stats-grid {
@@ -196,7 +244,7 @@
       padding: 1.5rem;
       border-radius: 10px;
       text-align: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
     .stat-number {
@@ -210,297 +258,1300 @@
       opacity: 0.9;
     }
 
-    #messages {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1000;
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background: linear-gradient(45deg, #34495e, #2c3e50);
+      color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .badge-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-danger {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .badge-warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .badge-primary {
+      background: #cce5ff;
+      color: #004085;
     }
 
     .message {
+      position: fixed;
+      top: 20px;
+      right: 20px;
       padding: 1rem 1.5rem;
-      margin-bottom: 0.5rem;
-      border-radius: 5px;
+      border-radius: 8px;
       color: white;
       font-weight: bold;
-      opacity: 0;
-      animation: slideIn 0.3s forwards, slideOut 0.3s 2.7s forwards;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
-    .message.success { background: #2ecc71; }
-    .message.error { background: #e74c3c; }
-    .message.warning { background: #f39c12; }
+    .message.success { background: #28a745; }
+    .message.error { background: #dc3545; }
+    .message.warning { background: #ffc107; color: #333; }
 
     @keyframes slideIn {
-      from { opacity: 0; transform: translateX(100%); }
-      to { opacity: 1; transform: translateX(0); }
+      from {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
-    @keyframes slideOut {
-      from { opacity: 1; transform: translateX(0); }
-      to { opacity: 0; transform: translateX(100%); }
-    }
-
-    .report-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
+    .config-info {
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      border: 2px solid #90caf9;
+      padding: 1.5rem;
+      border-radius: 10px;
       margin-top: 2rem;
     }
 
+    .config-info h3 {
+      color: #1976d2;
+      margin-bottom: 1rem;
+    }
+
+    .config-info ul {
+      margin-left: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .config-info li {
+      margin: 0.5rem 0;
+    }
+
+    .info-box {
+      background: white;
+      padding: 1rem;
+      border: 1px solid #90caf9;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    .row-overdue {
+      background-color: #fff5f5 !important;
+    }
+
+    .btn-small {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 768px) {
-      .form-grid {
-        grid-template-columns: 1fr;
+      .header-content {
+        flex-direction: column;
+        text-align: center;
       }
-      
+
       .stats-grid {
         grid-template-columns: repeat(2, 1fr);
       }
-      
-      .report-grid {
+
+      .form-grid {
         grid-template-columns: 1fr;
       }
-      
-      nav {
-        flex-direction: column;
-        align-items: center;
+
+      table {
+        font-size: 0.9rem;
+      }
+
+      th, td {
+        padding: 0.5rem;
       }
     }
   </style>
 </head>
 <body>
-  <div id="messages"></div>
+  <div id="app"></div>
 
-  <header>
-    <h1>📚 BiblioSys</h1>
-    <p>Sistema de Controle de Biblioteca</p>
-  </header>
+  <script>
+    let currentUser = null;
+    let currentSection = 'dashboard';
+    
+    let books = [];
+    let members = [];
+    let staff = [];
+    let loans = [];
+    let reservations = [];
+    
+    let systemConfig = {
+      loanDays: 14,
+      toleranceDays: 2,
+      maxLoansPerMember: 3,
+      allowRenewal: true,
+      renewalDays: 7
+    };
 
-  <nav>
-    <button onclick="showSection('books')">📖 Livros</button>
-    <button onclick="showSection('members')">👥 Membros</button>
-    <button onclick="showSection('loans')">📋 Empréstimos</button>
-    <button onclick="showSection('returns')">↩️ Devoluções</button>
-    <button onclick="showSection('overdues')">⚠️ Atrasos</button>
-    <button onclick="showSection('reports')">📊 Relatórios</button>
-  </nav>
+    async function init() {
+      await loadData();
+      render();
+    }
 
-  <main>
-    <section id="books" class="card">
-      <h2>📖 Gerenciamento de Livros</h2>
+    async function loadData() {
+      try {
+        const [booksRes, membersRes, loansRes, reservationsRes] = await Promise.all([
+          fetch('/api/books'),
+          fetch('/api/members'),
+          fetch('/api/loans'),
+          fetch('/api/reservations')
+        ]);
+
+        books = await booksRes.json();
+        members = await membersRes.json();
+        loans = await loansRes.json();
+        reservations = await reservationsRes.json();
+
+        staff = [
+          { id: 1, name: "Ana Silva", email: "ana@biblioteca.com", password: "123456", role: 'librarian', active: true },
+          { id: 2, name: "Maria Costa", email: "maria@biblioteca.com", password: "123456", role: 'manager', active: true },
+          { id: 3, name: "Admin", email: "admin@biblioteca.com", password: "admin", role: 'admin', active: true }
+        ];
+      } catch(error) {
+        console.error('Erro ao carregar dados:', error);
+      }
+    }
+
+    function showMessage(text, type = 'success') {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}`;
+      messageDiv.textContent = text;
+      document.body.appendChild(messageDiv);
+
+      setTimeout(() => messageDiv.remove(), 3000);
+    }
+
+    function getRoleLabel(role) {
+      const roles = {
+        admin: 'Administrador',
+        manager: 'Gestor',
+        librarian: 'Bibliotecário(a)',
+        member: 'Membro(a)'
+      };
+      return roles[role] || role;
+    }
+
+    function canAccess(requiredRoles) {
+      if(!currentUser)
+        return false;
+      return requiredRoles.includes(currentUser.role);
+    }
+
+    function getOverdueLoans() {
+      const now = new Date();
+      return loans.filter(loan => {
+        if(loan.status !== 'Active')
+          return false;
+        const returnDate = new Date(loan.returnDate);
+        const toleranceDate = new Date(returnDate);
+        toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
+        return now > toleranceDate;
+      });
+    }
+
+    function isLoanOverdue(loan) {
+      if(loan.status !== 'Active')
+        return false;
+      const now = new Date();
+      const returnDate = new Date(loan.returnDate);
+      const toleranceDate = new Date(returnDate);
+      toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
+      return now > toleranceDate;
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const user = staff.find(s => s.email === email && s.password === password && s.active);
+
+      if(user) {
+        currentUser = user;
+        currentSection = 'dashboard';
+        showMessage(`Bem-vindo(a), ${user.name}!`, 'success');
+        render();
+        return
+      }
+
+      const membersRes = await fetch('/api/members');
+      const membersData = await membersRes.json();
+
+      const member = membersData.find(m => m.email === email);
+      if(member) {
+        currentUser = {
+          id: member.id,
+          name: member.name,
+          email: member.email,
+          role: 'member',
+          active: true
+        };
+
+        currentSection = 'books';
+        showMessage(`Bem-vindo(a), ${member.name}!`, 'success');
+        render();
+        return;
+      }
+
+      showMessage('Credenciais inválidas!', 'error');
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      currentSection = 'dashboard';
+      render();
+    }
+
+    function navigateTo(section) {
+      currentSection = section;
+      render();
+    }
+
+    async function handleAddBook(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const form = e.target;
+      const bookData = {
+        title: form.title.value,
+        author: form.author.value,
+        category: form.category.value,
+        count: parseInt(form.count.value)
+      };
+
+      try {
+        const response = await fetch('/api/books', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bookData)
+        });
+
+        if(response.ok) {
+          const book = await response.json();
+          books.push(book);
+          form.reset();
+          showMessage('Livro cadastrado com sucesso!');
+          render();
+        }
+      } catch(error) {
+        showMessage('Erro ao cadastrar livro!', 'error');
+      }
+    }
+
+    async function handleAddMember(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const form = e.target;
+      const memberData = {
+        name: form.name.value,
+        contact: form.contact.value,
+        email: form.email.value
+      };
+
+      try {
+        const response = await fetch('/api/members', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(memberData)
+        });
+
+        if(response.ok) {
+          const member = await response.json();
+          members.push(member);
+          form.reset();
+          showMessage('Leitor cadastrado com sucesso!');
+          render();
+        }
+      } catch(error) {
+        showMessage('Erro ao cadastrar leitor!', 'error');
+      }
+    }
+
+    function handleAddStaff(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const form = e.target;
+      const newStaff = {
+        id: Date.now(),
+        name: form.staffName.value,
+        email: form.staffEmail.value,
+        password: form.staffPassword.value,
+        role: form.staffRole.value,
+        active: true
+      };
+
+      staff.push(newStaff);
+      form.reset();
+      showMessage('Funcionário cadastrado com sucesso!');
+      render();
+    }
+
+    async function handleAddLoan(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const form = e.target;
+      const bookId = parseInt(form.loanBook.value);
+      const memberId = parseInt(form.loanMember.value);
+
+      const book = books.find(b => b.id === bookId);
+      const member = members.find(m => m.id === memberId);
+
+      if(!book || book.available <= 0) {
+        showMessage('Livro não disponível!', 'error');
+        return;
+      }
+
+      if(member.activeLoans >= systemConfig.maxLoansPerMember) {
+        showMessage('Limite de empréstimos atingido!', 'error');
+        return;
+      }
+
+      const loanDate = new Date();
+      const returnDate = new Date(loanDate);
+      returnDate.setDate(returnDate.getDate() + systemConfig.loanDays);
+
+      try {
+        const response = await fetch('/api/loans', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookId,
+            memberId,
+            loanDate: loanDate.toISOString(),
+            returnDate: returnDate.toISOString()
+          })
+        });
+
+        if(response.ok) {
+          const loan = await response.json();
+          loans.push(loan);
+          
+          book.available--;
+          member.activeLoans++;
+          
+          form.reset();
+          showMessage('Empréstimo registrado com sucesso!');
+          render();
+        }
+      } catch(error) {
+        showMessage('Erro ao registrar empréstimo!', 'error');
+      }
+    }
+
+    async function handleLoanFromReservation(reservationId) {
+      try {
+        const reservation = reservations.find(r => r.id === reservationId);
+        if(!reservation) {
+          showMessage('Reserva não encontrada!', 'error');
+          return;
+        }
+
+        const book = books.find(b => b.id === reservation.bookId);
+        const member = members.find(m => m.id === reservation.memberId);
+
+        if(!book || book.available <= 0) {
+          showMessage('Livro não disponível para empréstimo!', 'error');
+          return;
+        }
+
+        if(member.activeLoans >= systemConfig.maxLoansPerMember) {
+          showMessage('Leitor atingiu o limite de empréstimos!', 'error');
+          return;
+        }
+
+        handleCancelReservation(reservationId);
+
+        const loanDate = new Date();
+        const returnDate = new Date(loanDate);
+        returnDate.setDate(returnDate.getDate() + systemConfig.loanDays);
+
+        const loanResponse = await fetch('/api/loans', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookId: reservation.bookId,
+            memberId: reservation.memberId,
+            loanDate: loanDate.toISOString(),
+            returnDate: returnDate.toISOString()
+          })
+        });
+
+        if(loanResponse.ok) {
+          const loan = await loanResponse.json();
+          loans.push(loan);
+
+          book.available--;
+          member.activeLoans++;
+
+          reservation.status = 'Completed';
+
+          showMessage('Empréstimo realizado a partir da reserva!', 'success');
+          render();
+        }
+      } catch(error) {
+        showMessage('Erro ao processar empréstimo da reserva!', 'error');
+      }
+    }
+
+    async function handleReturnLoan(loanId) {
+      try {
+        const response = await fetch(`/api/loans/${loanId}/return`, { method: 'PUT' });
+
+        if(response.ok) {
+          const loan = loans.find(l => l.id === loanId);
+          loan.status = 'returned';
+          loan.returnedDate = new Date().toISOString();
+
+          const book = books.find(b => b.id === loan.bookId);
+          const member = members.find(m => m.id === loan.memberId);
+
+          if(book)
+            book.available++;
+          if(member)
+            member.activeLoans--;
+
+          showMessage('Devolução registrada com sucesso!');
+          render();
+        }
+      } catch(error) {
+        showMessage('Erro ao registrar devolução!', 'error');
+      }
+    }
+
+    function handleUpdateConfig(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const form = e.target;
       
-      <form onsubmit="addBook(event)" class="form-grid">
-        <div class="form-group">
-          <label for="title">Título *</label>
-          <input type="text" id="title" required>
-        </div>
-        <div class="form-group">
-          <label for="author">Autor *</label>
-          <input type="text" id="author" required>
-        </div>
-        <div class="form-group">
-          <label for="category">Categoria</label>
-          <input type="text" id="category" placeholder="Ex: Literatura, Ficção">
-        </div>
-        <div class="form-group">
-          <label for="count">Quantidade *</label>
-          <input type="number" id="count" min="1" required>
-        </div>
-        <div class="form-group">
-          <button type="submit" class="btn btn-success">Adicionar Livro</button>
-        </div>
-      </form>
+      systemConfig = {
+        loanDays: parseInt(form.loanDays.value),
+        toleranceDays: parseInt(form.toleranceDays.value),
+        maxLoansPerMember: parseInt(form.maxLoansPerMember.value),
+        allowRenewal: form.allowRenewal.checked,
+        renewalDays: parseInt(form.renewalDays.value)
+      };
 
-      <div class="search-bar">
-        <div class="form-group" style="flex: 1;">
-          <label for="searchBook">Buscar Livros</label>
-          <input type="text" id="searchBook" placeholder="Título, autor ou categoria..." onkeyup="searchBooks()">
-        </div>
-        <div class="form-group">
-          <label for="availableFilter">Filtrar por</label>
-          <select id="availableFilter" onchange="searchBooks()">
-            <option value="">Todos</option>
-            <option value="available">Disponíveis</option>
-            <option value="unavailable">Indisponíveis</option>
-          </select>
-        </div>
-      </div>
+      showMessage('Configurações atualizadas com sucesso!');
+      render();
+    }
 
-      <table id="booksTable">
-        <thead>
-          <tr>
-            <th>Título</th>
-            <th>Autor</th>
-            <th>Categoria</th>
-            <th>Qtd Total</th>
-            <th>Disponibilidade</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+    async function handleCancelReservation(reservationId) {
+      try {
+        const response = await fetch(`/api/reservations/${reservationId}/cancel`, {
+          method: 'PUT'
+        });
 
-    <section id="members" class="card hidden">
-      <h2>👥 Cadastro de Membros</h2>
+        if(response.ok) {
+          const reservation = reservations.find(r => r.id === reservationId);
+          reservation.status = 'Cancelled';
+          showMessage('Reserva cancelada com sucesso!', 'success');
+          render();
+        }
+      } catch(error) {
+        showMessage('Erro ao cancelar reserva!', 'error');
+      }
+    }
+
+    async function handleReserveClick(bookId) {
+      try {
+        if(currentUser.role === 'member') {
+          const member = members.find(m => m.email === currentUser.email);
+
+          if(!member) {
+            showMessage('Leitor não encontrado no sistema!', 'error');
+            return;
+          }
+
+          const existingReservation = reservations.find(r => 
+            r.bookId === bookId && r.memberId === member.id && r.status === 'Active'
+          );
+
+          if(existingReservation) {
+            showMessage('Você já tem uma reserva ativa para este livro!', 'warning');
+            return;
+          }
+
+          const activeReservations = reservations.filter(r => 
+            r.memberId === member.id && r.status === 'Active'
+          ).length;
+
+          if(activeReservations >= 2) {
+            showMessage('Limite de reservas atingido! Máximo 2 reservas ativas.', 'error');
+            return;
+          }
+        }
+
+        const response = await fetch('/api/reservations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            bookId: bookId,
+            memberId: currentUser.role === 'member' ? members.find(m => m.email === currentUser.email).id : null,
+          })
+        });
+
+        if(response.ok) {
+          const reservation = await response.json();
+          reservations.push(reservation);
+          showMessage('Reserva registrada com sucesso!', 'success');
+          render();
+        } else {
+          const err = await response.json();
+          showMessage(err.error || 'Erro ao registrar reserva!', 'error');
+        }
+
+      } catch(error) {
+        console.error(error);
+        showMessage('Erro de comunicação com o servidor!', 'error');
+      }
+    }
+
+    function toggleStaffStatus(staffId) {
+      const person = staff.find(s => s.id === staffId);
+      if(person) {
+        person.active = !person.active;
+        showMessage('Status atualizado!');
+        render();
+      }
+    }
+
+    function getReservationStatus(reservation) {
+      const now = new Date();
+      const expiryDate = new Date(reservation.reservationDate);
+      expiryDate.setDate(expiryDate.getDate() + systemConfig.reservationDays);
+
+      if(reservation.status === 'completed')
+        return { text: 'Concluída', class: 'badge-success' };
+      if(reservation.status === 'cancelled')
+        return { text: 'Cancelada', class: 'badge-danger' };
+      if(reservation.status === 'Active') {
+        if(now > expiryDate)
+          return { text: 'Expirada', class: 'badge-warning' };
+        return { text: 'Ativa', class: 'badge-info' };
+      }
+      return { text: reservation.status, class: 'badge-secondary' };
+    }
+
+    function render() {
+      const app = document.getElementById('app');
       
-      <form onsubmit="addMember(event)" class="form-grid">
-        <div class="form-group">
-          <label for="memberName">Nome *</label>
-          <input type="text" id="memberName" required>
-        </div>
-        <div class="form-group">
-          <label for="memberContact">Contato *</label>
-          <input type="tel" id="memberContact" placeholder="(34) 99999-9999" required>
-        </div>
-        <div class="form-group">
-          <label for="memberEmail">E-mail</label>
-          <input type="email" id="memberEmail" placeholder="email@exemplo.com">
-        </div>
-        <div class="form-group">
-          <button type="submit" class="btn btn-success">Cadastrar Membro</button>
-        </div>
-      </form>
+      if(!currentUser) {
+        app.innerHTML = renderLoginPage();
+        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+      } else {
+        app.innerHTML = renderMainPage();
+        attachEventListeners();
+      }
+    }
 
-      <table id="membersTable">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Contato</th>
-            <th>E-mail</th>
-            <th>Empréstimos Ativos</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+    function renderLoginPage() {
+      return `
+        <div class="login-container">
+          <div class="login-card">
+            <div class="login-header">
+              <div class="login-icon">📚</div>
+              <h1>BiblioSys</h1>
+              <p>Sistema de Controle de Biblioteca</p>
+            </div>
 
-    <section id="loans" class="card hidden">
-      <h2>📋 Registrar Empréstimo</h2>
-      
-      <form onsubmit="addLoan(event)" class="form-grid">
-        <div class="form-group">
-          <label for="loanBook">Livro *</label>
-          <select id="loanBook" required>
-            <option value="">Selecione um livro</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="loanMember">Membro *</label>
-          <select id="loanMember" required>
-            <option value="">Selecione um membro</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <button type="submit" class="btn btn-success">Registrar Empréstimo</button>
-        </div>
-      </form>
+            <form id="loginForm">
+              <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" id="loginEmail" required>
+              </div>
 
-      <h3 style="margin-top: 2rem; color: #2c3e50;">Histórico de Empréstimos</h3>
-      <table id="loansTable">
-        <thead>
-          <tr>
-            <th>Livro</th>
-            <th>Membro</th>
-            <th>Data Empréstimo</th>
-            <th>Data Devolução</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+              <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="loginPassword" required>
+              </div>
 
-    <section id="returns" class="card hidden">
-      <h2>↩️ Registrar Devoluções</h2>
-      <p style="margin-bottom: 1.5rem; color: #666;">Clique em "Devolver" para registrar a devolução de um livro.</p>
-      
-      <table id="returnTable">
-        <thead>
-          <tr>
-            <th>Livro</th>
-            <th>Membro</th>
-            <th>Data Empréstimo</th>
-            <th>Data Limite</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+              <button type="submit" class="btn btn-primary">Entrar</button>
+            </form>
 
-    <section id="overdues" class="card hidden">
-      <h2>⚠️ Controle de Atrasos</h2>
-      <p style="margin-bottom: 1.5rem; color: #e74c3c; font-weight: bold;">
-        Livros com devolução em atraso aparecem destacados em vermelho.
-      </p>
-      
-      <table id="overduesTable">
-        <thead>
-          <tr>
-            <th>Livro</th>
-            <th>Membro</th>
-            <th>Data Limite</th>
-            <th>Dias em Atraso</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+            <div class="test-credentials">
+              <p><strong>Credenciais de teste:</strong></p>
+              <p>Bibliotecária: ana@biblioteca.com / 123456</p>
+              <p>Gestora: maria@biblioteca.com / 123456</p>
+              <p>Admin: admin@biblioteca.com / admin</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
-    <section id="reports" class="card hidden">
-      <h2>📊 Relatórios Gerenciais</h2>
-      
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number" id="bookLength">0</div>
-          <div class="stat-label">Total de Livros</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="memberLength">0</div>
-          <div class="stat-label">Membros Cadastrados</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="activeLoans">0</div>
-          <div class="stat-label">Empréstimos Ativos</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="overdueBooks">0</div>
-          <div class="stat-label">Livros em Atraso</div>
-        </div>
-      </div>
+    function renderMainPage() {
+      return `
+        <header>
+          <div class="header-content">
+            <div class="header-left">
+              <div>
+                <h1>📚 BiblioSys</h1>
+                <p>${getRoleLabel(currentUser.role)}</p>
+              </div>
+            </div>
+            <div class="header-right">
+              <div class="user-info">
+                <p><strong>${currentUser.name}</strong></p>
+                <p>${currentUser.email}</p>
+              </div>
+              <button onclick="handleLogout()" class="btn btn-secondary btn-small">Sair</button>
+            </div>
+          </div>
+        </header>
 
-      <div class="report-grid">
-        <div>
-          <h3 style="color: #2c3e50; margin-bottom: 1rem;">📚 Livros Mais Emprestados</h3>
-          <table id="mostBorrowedBooksTable">
+        <nav>
+          <div class="nav-buttons">
+            ${canAccess(['admin', 'manager', 'librarian']) ? `
+              <button class="nav-btn ${currentSection === 'dashboard' ? 'active' : ''}" onclick="navigateTo('dashboard')">
+                📊 Dashboard
+              </button>
+            ` : ''}
+            ${canAccess(['admin', 'manager', 'librarian', 'member']) ? `
+              <button class="nav-btn ${currentSection === 'books' ? 'active' : ''}" onclick="navigateTo('books')">
+                📖 Livros
+              </button>
+            ` : ''}
+            ${canAccess(['admin', 'manager', 'librarian']) ? `
+              <button class="nav-btn ${currentSection === 'members' ? 'active' : ''}" onclick="navigateTo('members')">
+                👥 Leitores
+              </button>
+              <button class="nav-btn ${currentSection === 'loans' ? 'active' : ''}" onclick="navigateTo('loans')">
+                📋 Empréstimos
+              </button>
+            ` : ''}
+            ${canAccess(['admin', 'manager']) ? `
+              <button class="nav-btn ${currentSection === 'staff' ? 'active' : ''}" onclick="navigateTo('staff')">
+                👤 Funcionários
+              </button>
+              <button class="nav-btn ${currentSection === 'config' ? 'active' : ''}" onclick="navigateTo('config')">
+                ⚙️ Configurações
+              </button>
+            ` : ''}
+          </div>
+        </nav>
+
+        <main>
+          ${renderSection()}
+        </main>
+
+        <footer style="background: #2c3e50; color: white; text-align: center; padding: 1rem; margin-top: 2rem;">
+          <p>BiblioSys © 2025 - Sistema de Controle de Biblioteca</p>
+          <p style="font-size: 0.85rem; opacity: 0.8;">Desenvolvido para N385 - Projeto e Desenvolvimento de Sistemas</p>
+        </footer>
+      `;
+    }
+
+    function renderSection() {
+      switch(currentSection) {
+        case 'dashboard': return renderDashboard();
+        case 'books': return renderBooks();
+        case 'members': return renderMembers();
+        case 'loans': return renderLoans();
+        case 'staff': return renderStaff();
+        case 'config': return renderConfig();
+        default: return renderDashboard();
+      }
+    }
+
+    function renderDashboard() {
+      const activeLoans = loans.filter(l => l.status === 'Active').length;
+      const overdueLoans = getOverdueLoans().length;
+
+      return `
+        <div class="card">
+          <h2>Dashboard</h2>
+          
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-number">${books.length}</div>
+              <div class="stat-label">Total de Livros</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">${members.length}</div>
+              <div class="stat-label">Leitores Cadastrados</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">${activeLoans}</div>
+              <div class="stat-label">Empréstimos Ativos</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">${overdueLoans}</div>
+              <div class="stat-label">Empréstimos em Atraso</div>
+            </div>
+          </div>
+
+          ${canAccess(['admin', 'manager']) ? `
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Configurações Atuais</h3>
+            <div class="stats-grid">
+              <div class="stat-card" style="background: linear-gradient(45deg, #3498db, #2980b9);">
+                <div class="stat-number">${systemConfig.loanDays}</div>
+                <div class="stat-label">Prazo de Empréstimo (dias)</div>
+              </div>
+              <div class="stat-card" style="background: linear-gradient(45deg, #e74c3c, #c0392b);">
+                <div class="stat-number">${systemConfig.toleranceDays}</div>
+                <div class="stat-label">Tolerância de Atraso (dias)</div>
+              </div>
+              <div class="stat-card" style="background: linear-gradient(45deg, #2ecc71, #27ae60);">
+                <div class="stat-number">${systemConfig.maxLoansPerMember}</div>
+                <div class="stat-label">Limite por Leitor</div>
+              </div>
+              <div class="stat-card" style="background: linear-gradient(45deg, #f39c12, #e67e22);">
+                <div class="stat-number">${systemConfig.allowRenewal ? systemConfig.renewalDays : 0}</div>
+                <div class="stat-label">Renovação (dias)</div>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderBooks() {
+      if(!canAccess(['admin', 'manager', 'librarian', 'member']))
+        return '';
+
+      return `
+        <div class="card">
+          <h2>Gerenciamento de Livros</h2>
+
+          ${canAccess(['admin', 'manager', 'librarian']) ? `
+          <h3 style="margin-bottom: 1rem;">Cadastrar Novo Livro</h3>
+          <form id="bookForm" class="form-grid">
+            <div class="form-group">
+              <label>Título *</label>
+              <input type="text" name="title" required>
+            </div>
+            <div class="form-group">
+              <label>Autor *</label>
+              <input type="text" name="author" required>
+            </div>
+            <div class="form-group">
+              <label>Categoria</label>
+              <input type="text" name="category">
+            </div>
+            <div class="form-group">
+              <label>Quantidade *</label>
+              <input type="number" name="count" min="1" value="1" required>
+            </div>
+            <div class="form-group">
+              <label style="opacity: 0;">.</label>
+              <button type="submit" class="btn btn-success">Adicionar Livro</button>
+            </div>
+          </form>` : ''}
+
+          <table>
             <thead>
               <tr>
                 <th>Título</th>
-                <th>Empréstimos</th>
+                <th>Autor</th>
+                <th>Categoria</th>
+                <th style="text-align: center;">Total</th>
+                <th style="text-align: center;">Disponível</th>
+                <th style="text-align: center;">Reservas</th>
+                <th style="text-align: center;">Status</th>
+                <th style="text-align: center;">Ação</th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              ${books.map(book => {
+                const bookReservations = reservations.filter(r => r.bookId === book.id && r.status === 'Active');
+                return `
+                <tr>
+                  <td><strong>${book.title}</strong></td>
+                  <td>${book.author}</td>
+                  <td>${book.category || 'N/A'}</td>
+                  <td style="text-align: center;">${book.count}</td>
+                  <td style="text-align: center;">${book.available}</td>
+                  <td style="text-align: center;">
+                    ${bookReservations.length > 0 
+                      ? `<span class="reservation-badge">${bookReservations.length}</span>`
+                      : '-'
+                    }
+                  </td>
+                  <td style="text-align: center;">
+                    ${book.available > 0 
+                      ? '<span class="badge badge-success">Disponível</span>'
+                      : '<span class="badge badge-danger">Indisponível</span>'
+                    }
+                  </td>
+                  <td style="text-align: center;"> ${book.available > 0 ? '<button class="btn btn-success btn-reserve" data-book-id="' + book.id + '">Reservar</button>' : '' } </td>
+                </tr>
+              `}).join('')}
+            </tbody>
           </table>
         </div>
-        
-        <div>
-          <h3 style="color: #2c3e50; margin-bottom: 1rem;">👥 Usuários Mais Ativos</h3>
-          <table id="mostActiveUsersTable">
+      `;
+    }
+
+    function renderMembers() {
+      if(!canAccess(['admin', 'manager', 'librarian']))
+        return '';
+
+      return `
+        <div class="card">
+          <h2>Gerenciamento de Leitores</h2>
+          
+          <h3 style="margin-bottom: 1rem;">Cadastrar Novo Leitor</h3>
+          <form id="memberForm" class="form-grid">
+            <div class="form-group">
+              <label>Nome *</label>
+              <input type="text" name="name" required>
+            </div>
+            <div class="form-group">
+              <label>Contato *</label>
+              <input type="tel" name="contact" placeholder="(34) 99999-9999" required>
+            </div>
+            <div class="form-group">
+              <label>E-mail</label>
+              <input type="email" name="email">
+            </div>
+            <div class="form-group">
+              <label style="opacity: 0;">.</label>
+              <button type="submit" class="btn btn-success">Cadastrar Leitor</button>
+            </div>
+          </form>
+
+          <table>
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>Empréstimos</th>
+                <th>Contato</th>
+                <th>E-mail</th>
+                <th style="text-align: center;">Empréstimos Ativos</th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              ${members.map(member => `
+                <tr>
+                  <td><strong>${member.name}</strong></td>
+                  <td>${member.contact}</td>
+                  <td>${member.email || 'N/A'}</td>
+                  <td style="text-align: center;">
+                    <span class="badge ${member.activeLoans >= systemConfig.maxLoansPerMember ? 'badge-danger' : 'badge-info'}">
+                      ${member.activeLoans || 0}
+                    </span>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
           </table>
         </div>
-      </div>
-    </section>
-  </main>
+      `;
+    }
 
-  <script src="client.js"></script>
+    function renderLoans() {
+      if(!canAccess(['admin', 'manager', 'librarian']))
+        return '';
+
+      const availableBooks = books.filter(b => b.available > 0);
+      const availableMembers = members.filter(m => (m.activeLoans || 0) < systemConfig.maxLoansPerMember);
+
+      return `
+        <div class="card">
+          <h2>Gerenciamento de Empréstimos</h2>
+          
+          <h3 style="margin-bottom: 1rem;">Registrar Novo Empréstimo</h3>
+          <form id="loanForm" class="form-grid">
+            <div class="form-group">
+              <label>Livro *</label>
+              <select name="loanBook" required>
+                <option value="">Selecione um livro</option>
+                ${availableBooks.map(book => `
+                  <option value="${book.id}">${book.title} (${book.available} disponível)</option>
+                `).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Leitor *</label>
+              <select name="loanMember" required>
+                <option value="">Selecione um leitor</option>
+                ${availableMembers.map(member => `
+                  <option value="${member.id}">${member.name}</option>
+                `).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="opacity: 0;">.</label>
+              <button type="submit" class="btn btn-success">Registrar Empréstimo</button>
+            </div>
+          </form>
+
+          <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Reservas Ativas</h3>
+          ${reservations.filter(r => r.status === 'Active').length === 0 ? `
+            <p style="text-align: center; color: #666; padding: 2rem;">Nenhuma reserva ativa no momento.</p>
+          ` : `
+            <table>
+              <thead>
+                <tr>
+                  <th>Livro</th>
+                  <th>Leitor</th>
+                  <th style="text-align: center;">Data Reserva</th>
+                  <th style="text-align: center;">Expira em</th>
+                  <th style="text-align: center;">Status</th>
+                  <th style="text-align: center;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${reservations
+                  .filter(r => r.status === 'Active')
+                  .map(reservation => {
+                    const status = getReservationStatus(reservation);
+                    const expiryDate = new Date(reservation.reservationDate);
+                    expiryDate.setDate(expiryDate.getDate() + systemConfig.reservationDays);
+
+                    return `
+                      <tr>
+                        <td><strong>${reservation.bookTitle}</strong></td>
+                        <td>${reservation.memberName}</td>
+                        <td style="text-align: center;">${reservation.reservationDate}</td>
+                        <td style="text-align: center;">${expiryDate.toLocaleDateString('pt-BR')}</td>
+                        <td style="text-align: center;">
+                          <span class="badge ${status.class}">${status.text}</span>
+                        </td>
+                        <td style="text-align: center;">
+                          <button onclick="handleLoanFromReservation(${reservation.id})" class="btn btn-success btn-small">
+                            Emprestar
+                          </button>
+                          <button onclick="handleCancelReservation(${reservation.id})" class="btn btn-danger btn-small">
+                            Cancelar
+                          </button>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+              </tbody>
+            </table>
+          `}
+
+          <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Histórico de Empréstimos</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Livro</th>
+                <th>Leitor</th>
+                <th style="text-align: center;">Data Empréstimo</th>
+                <th style="text-align: center;">Data Devolução</th>
+                <th style="text-align: center;">Status</th>
+                <th style="text-align: center;">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${loans.map(loan => {
+                const isOverdue = isLoanOverdue(loan);
+                return `
+                  <tr class="${isOverdue ? 'row-overdue' : ''}">
+                    <td><strong>${loan.bookTitle}</strong></td>
+                    <td>${loan.memberName}</td>
+                    <td style="text-align: center;">${new Date(loan.loanDate).toLocaleDateString('pt-BR')}</td>
+                    <td style="text-align: center;">${new Date(loan.returnDate).toLocaleDateString('pt-BR')}</td>
+                    <td style="text-align: center;">
+                      ${loan.status === 'Active' 
+                        ? (isOverdue 
+                          ? '<span class="badge badge-danger">Em Atraso</span>'
+                          : '<span class="badge badge-info">Ativo</span>')
+                        : '<span class="badge badge-success">Devolvido</span>'
+                      }
+                    </td>
+                    <td style="text-align: center;">
+                      ${loan.status === 'Active' 
+                        ? `<button onclick="handleReturnLoan(${loan.id})" class="btn btn-success btn-small">Devolver</button>`
+                        : '-'
+                      }
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderStaff() {
+      if(!canAccess(['admin', 'manager']))
+        return '';
+
+      return `
+        <div class="card">
+          <h2>Gerenciamento de Funcionários</h2>
+          
+          <h3 style="margin-bottom: 1rem;">Cadastrar Novo Funcionário</h3>
+          <form id="staffForm" class="form-grid">
+            <div class="form-group">
+              <label>Nome *</label>
+              <input type="text" name="staffName" required>
+            </div>
+            <div class="form-group">
+              <label>E-mail *</label>
+              <input type="email" name="staffEmail" required>
+            </div>
+            <div class="form-group">
+              <label>Senha *</label>
+              <input type="password" name="staffPassword" required>
+            </div>
+            <div class="form-group">
+              <label>Cargo *</label>
+              <select name="staffRole" required>
+                <option value="librarian">Bibliotecário(a)</option>
+                ${currentUser.role === 'admin' ? `
+                  <option value="manager">Gestor(a)</option>
+                  <option value="admin">Administrador(a)</option>
+                ` : ''}
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="opacity: 0;">.</label>
+              <button type="submit" class="btn btn-success">Adicionar Funcionário</button>
+            </div>
+          </form>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th style="text-align: center;">Cargo</th>
+                <th style="text-align: center;">Status</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${staff.map(person => `
+                <tr>
+                  <td><strong>${person.name}</strong></td>
+                  <td>${person.email}</td>
+                  <td style="text-align: center;">
+                    <span class="badge badge-primary">${getRoleLabel(person.role)}</span>
+                  </td>
+                  <td style="text-align: center;">
+                    ${person.active 
+                      ? '<span class="badge badge-success">Ativo</span>'
+                      : '<span class="badge badge-danger">Inativo</span>'
+                    }
+                  </td>
+                  <td style="text-align: center;">
+                    ${person.id !== currentUser.id 
+                      ? `<button onclick="toggleStaffStatus(${person.id})" class="btn ${person.active ? 'btn-danger' : 'btn-success'} btn-small">
+                          ${person.active ? 'Desativar' : 'Ativar'}
+                        </button>`
+                      : '-'
+                    }
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderConfig() {
+      if(!canAccess(['admin', 'manager']))
+        return '';
+
+      const exampleDate = new Date('2025-01-01');
+      const returnDate = new Date(exampleDate);
+      returnDate.setDate(returnDate.getDate() + systemConfig.loanDays);
+      const toleranceDate = new Date(returnDate);
+      toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
+
+      return `
+        <div class="card">
+          <h2>Configurações do Sistema</h2>
+          
+          <h3 style="margin-bottom: 1rem;">Parâmetros de Empréstimo</h3>
+          <form id="configForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Prazo de Empréstimo (dias) *</label>
+                <input type="number" name="loanDays" value="${systemConfig.loanDays}" min="1" required>
+                <small style="color: #666; font-size: 0.85rem;">
+                  Período padrão que um leitor pode manter um livro emprestado
+                </small>
+              </div>
+
+              <div class="form-group">
+                <label>Dias de Tolerância para Atraso *</label>
+                <input type="number" name="toleranceDays" value="${systemConfig.toleranceDays}" min="0" required>
+                <small style="color: #666; font-size: 0.85rem;">
+                  Período de tolerância antes de considerar o empréstimo em atraso
+                </small>
+              </div>
+
+              <div class="form-group">
+                <label>Limite de Empréstimos por Leitor *</label>
+                <input type="number" name="maxLoansPerMember" value="${systemConfig.maxLoansPerMember}" min="1" required>
+                <small style="color: #666; font-size: 0.85rem;">
+                  Número máximo de livros que um leitor pode emprestar simultaneamente
+                </small>
+              </div>
+
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" name="allowRenewal" ${systemConfig.allowRenewal ? 'checked' : ''}>
+                  Permitir Renovação
+                </label>
+                <input type="number" name="renewalDays" value="${systemConfig.renewalDays}" min="1" placeholder="Dias de renovação" style="margin-top: 0.5rem;">
+                <small style="color: #666; font-size: 0.85rem;">
+                  Permite que leitores renovem empréstimos e define o período adicional
+                </small>
+              </div>
+            </div>
+
+            <div style="text-align: right; margin-top: 1.5rem;">
+              <button type="submit" class="btn btn-primary" style="width: auto; padding: 1rem 2rem;">
+                Salvar Configurações
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card config-info">
+          <h3>⏰ Como Funciona o Controle de Atrasos</h3>
+          <p><strong>Exemplo com configurações atuais:</strong></p>
+          <ul>
+            <li>Empréstimo realizado: 01/01/2025</li>
+            <li>Data limite de devolução: ${returnDate.toLocaleDateString('pt-BR')} (${systemConfig.loanDays} dias após empréstimo)</li>
+            <li>Período de tolerância: até ${toleranceDate.toLocaleDateString('pt-BR')} (+${systemConfig.toleranceDays} dias)</li>
+            <li>Considerado em atraso após: ${toleranceDate.toLocaleDateString('pt-BR')}</li>
+          </ul>
+          <div class="info-box">
+            <p>
+              💡 <strong>Dica:</strong> O período de tolerância permite uma margem antes de notificar atrasos, 
+              considerando feriados e fins de semana. Empréstimos só aparecem como "em atraso" 
+              após ultrapassar o período de devolução + tolerância.
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Informações do Sistema</h3>
+          <div class="stats-grid">
+            <div class="stat-card" style="background: linear-gradient(45deg, #3498db, #2980b9);">
+              <div class="stat-number">1.0.0</div>
+              <div class="stat-label">Versão</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(45deg, #2ecc71, #27ae60);">
+              <div class="stat-number">${staff.filter(s => s.active).length}</div>
+              <div class="stat-label">Funcionários Ativos</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(45deg, #f39c12, #e67e22);">
+              <div class="stat-number">${books.reduce((sum, b) => sum + b.count, 0)}</div>
+              <div class="stat-label">Acervo Total</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function attachEventListeners() {
+      const bookForm = document.getElementById('bookForm');
+      if(bookForm) {
+        const newBookForm = bookForm.cloneNode(true);
+        bookForm.parentNode.replaceChild(newBookForm, bookForm);
+        newBookForm.addEventListener('submit', handleAddBook);
+      }
+
+      const memberForm = document.getElementById('memberForm');
+      if(memberForm) {
+        const newMemberForm = memberForm.cloneNode(true);
+        memberForm.parentNode.replaceChild(newMemberForm, memberForm);
+        newMemberForm.addEventListener('submit', handleAddMember);
+      }
+
+      const staffForm = document.getElementById('staffForm');
+      if(staffForm) {
+        const newStaffForm = staffForm.cloneNode(true);
+        staffForm.parentNode.replaceChild(newStaffForm, staffForm);
+        newStaffForm.addEventListener('submit', handleAddStaff);
+      }
+
+      const loanForm = document.getElementById('loanForm');
+      if(loanForm) {
+        const newLoanForm = loanForm.cloneNode(true);
+        loanForm.parentNode.replaceChild(newLoanForm, loanForm);
+        newLoanForm.addEventListener('submit', handleAddLoan);
+      }
+
+      const configForm = document.getElementById('configForm');
+      if(configForm) {
+        const newConfigForm = configForm.cloneNode(true);
+        configForm.parentNode.replaceChild(newConfigForm, configForm);
+        newConfigForm.addEventListener('submit', handleUpdateConfig);
+      }
+
+      document.querySelectorAll('.btn-reserve').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const bookId = parseInt(btn.dataset.bookId);
+          handleReserveClick(bookId);
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
