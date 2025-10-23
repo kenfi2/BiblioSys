@@ -433,6 +433,7 @@
     let staff = [];
     let loans = [];
     let reservations = [];
+    let notifications = [];
     
     let systemConfig = {
       loanDays: 14,
@@ -449,17 +450,19 @@
 
     async function loadData() {
       try {
-        const [booksRes, membersRes, loansRes, reservationsRes] = await Promise.all([
+        const [booksRes, membersRes, loansRes, reservationsRes, notificationsRes] = await Promise.all([
           fetch('/api/books'),
           fetch('/api/members'),
           fetch('/api/loans'),
-          fetch('/api/reservations')
+          fetch('/api/reservations'),
+          fetch('/api/notifications')
         ]);
 
         books = await booksRes.json();
         members = await membersRes.json();
         loans = await loansRes.json();
         reservations = await reservationsRes.json();
+        notifications = await notificationsRes.json();
 
         staff = [
           { id: 1, name: "Ana Silva", email: "ana@biblioteca.com", password: "123456", role: 'librarian', active: true },
@@ -526,6 +529,8 @@
       const password = document.getElementById('loginPassword').value;
 
       const user = staff.find(s => s.email === email && s.password === password && s.active);
+
+      console.log(email, password);
 
       if(user) {
         currentUser = user;
@@ -896,6 +901,24 @@
       return { text: reservation.status, class: 'badge-secondary' };
     }
 
+    async function markNotificationAsRead(notificationId) {
+      try {
+        const response = await fetch(`/api/notifications/${notificationId}/read`, {
+          method: 'PUT'
+        });
+
+        if(response.ok) {
+          const notification = notifications.find(n => n.id === notificationId);
+          if(notification)
+            notification.status = 'read';
+          showMessage('Notificação marcada como lida!', 'success');
+          render();
+        }
+      } catch(error) {
+        showMessage('Erro ao marcar notificação!', 'error');
+      }
+    }
+
     function render() {
       const app = document.getElementById('app');
       
@@ -1043,6 +1066,22 @@
                 ⏰ Atrasos
               </button>
             ` : ''}
+            ${canAccess(['admin', 'manager', 'librarian']) ? `
+              <button class="nav-btn ${currentSection === 'notifications' ? 'active' : ''}" onclick="navigateTo('notifications')">
+                🔔 Notificações
+                ${notifications.filter(n => n.status === 'pending').length > 0 
+                  ? `<span style="background: #e74c3c; color: white; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.8rem; margin-left: 0.3rem;">
+                      ${notifications.filter(n => n.status === 'pending').length}
+                    </span>`
+                  : ''
+                }
+              </button>
+            ` : ''}
+            ${canAccess(['admin', 'manager']) ? `
+              <button class="nav-btn ${currentSection === 'reports' ? 'active' : ''}" onclick="navigateTo('reports')">
+                📊 Relatórios
+              </button>
+            ` : ''}
             ${canAccess(['admin', 'manager']) ? `
               <button class="nav-btn ${currentSection === 'staff' ? 'active' : ''}" onclick="navigateTo('staff')">
                 👤 Funcionários
@@ -1074,6 +1113,8 @@
         case 'staff': return renderStaff();
         case 'config': return renderConfig();
         case 'overdues': return renderOverdues();
+        case 'reports': return renderReports();
+        case 'notifications': return renderNotifications();
         default: return renderDashboard();
       }
     }
@@ -1568,6 +1609,297 @@
       `;
     }
 
+    function renderReports() {
+      if(!canAccess(['admin', 'manager']))
+        return '';
+
+      return `
+        <div class="card">
+          <h2>📊 Relatórios e Estatísticas</h2>
+          
+          <div class="stats-grid" style="margin-bottom: 2rem;">
+            <button class="stat-card" onclick="loadReport('most-borrowed')" style="cursor: pointer; border: none;">
+              <div class="stat-label">📚 Livros Mais Emprestados</div>
+            </button>
+            <button class="stat-card" onclick="loadReport('active-members')" style="cursor: pointer; border: none;">
+              <div class="stat-label">👥 Leitores Mais Ativos</div>
+            </button>
+            <button class="stat-card" onclick="loadReport('overdue-summary')" style="cursor: pointer; border: none;">
+              <div class="stat-label">⏰ Resumo de Atrasos</div>
+            </button>
+            <button class="stat-card" onclick="loadReport('collection-stats')" style="cursor: pointer; border: none;">
+              <div class="stat-label">📖 Estatísticas do Acervo</div>
+            </button>
+          </div>
+
+          <div id="reportContent"></div>
+        </div>
+      `;
+    }
+
+    async function loadReport(reportType) {
+      const reportContent = document.getElementById('reportContent');
+      reportContent.innerHTML = '<p style="text-align: center; padding: 2rem;">Carregando relatório...</p>';
+
+      try {
+        const response = await fetch(`/api/reports/${reportType}`);
+        const report = await response.json();
+
+        let html = `
+          <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin-top: 1rem;">
+            <h3 style="margin-bottom: 1rem; color: #2c3e50;">${report.title}</h3>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+              Gerado em: ${new Date(report.generatedAt).toLocaleString('pt-BR')}
+            </p>
+        `;
+
+        if(reportType === 'most-borrowed') {
+          if(report.data.length === 0) {
+            html += '<p style="text-align: center; color: #666;">Nenhum empréstimo registrado ainda.</p>';
+          } else {
+            html += `
+              <table>
+                <thead>
+                  <tr>
+                    <th style="text-align: center;">Posição</th>
+                    <th>Título</th>
+                    <th>Autor</th>
+                    <th style="text-align: center;">Empréstimos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${report.data.map((book, index) => `
+                    <tr>
+                      <td style="text-align: center;">
+                        <strong style="font-size: 1.2rem; color: #667eea;">#${index + 1}</strong>
+                      </td>
+                      <td><strong>${book.title}</strong></td>
+                      <td>${book.author}</td>
+                      <td style="text-align: center;">
+                        <span class="badge badge-info">${book.loanCount}</span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            `;
+          }
+        } else if(reportType === 'active-members') {
+          if(report.data.length === 0) {
+            html += '<p style="text-align: center; color: #666;">Nenhum leitor com empréstimos registrados.</p>';
+          } else {
+            html += `
+              <table>
+                <thead>
+                  <tr>
+                    <th style="text-align: center;">Posição</th>
+                    <th>Nome</th>
+                    <th>Contato</th>
+                    <th style="text-align: center;">Total de Empréstimos</th>
+                    <th style="text-align: center;">Empréstimos Ativos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${report.data.map((member, index) => `
+                    <tr>
+                      <td style="text-align: center;">
+                        <strong style="font-size: 1.2rem; color: #667eea;">#${index + 1}</strong>
+                      </td>
+                      <td><strong>${member.name}</strong></td>
+                      <td>${member.contact}</td>
+                      <td style="text-align: center;">
+                        <span class="badge badge-info">${member.loanCount}</span>
+                      </td>
+                      <td style="text-align: center;">
+                        <span class="badge badge-primary">${member.activeLoans}</span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            `;
+          }
+        } else if(reportType === 'overdue-summary') {
+          html += `
+            <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+              <strong style="color: #856404;">Total de empréstimos em atraso: ${report.totalOverdue}</strong>
+            </div>
+          `;
+          
+          if(report.data.length === 0) {
+            html += '<p style="text-align: center; color: #666;">Nenhum empréstimo em atraso! 🎉</p>';
+          } else {
+            html += `
+              <table>
+                <thead>
+                  <tr>
+                    <th>Livro</th>
+                    <th>Leitor</th>
+                    <th style="text-align: center;">Data de Devolução</th>
+                    <th style="text-align: center;">Dias de Atraso</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${report.data.map(loan => `
+                    <tr class="row-overdue">
+                      <td><strong>${loan.bookTitle}</strong></td>
+                      <td>${loan.memberName}</td>
+                      <td style="text-align: center;">${new Date(loan.returnDate).toLocaleDateString('pt-BR')}</td>
+                      <td style="text-align: center;">
+                        <span class="badge badge-danger">${loan.daysOverdue} dia(s)</span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            `;
+          }
+        } else if(reportType === 'collection-stats') {
+          const data = report.data;
+          html += `
+            <div class="stats-grid" style="margin-bottom: 1.5rem;">
+              <div class="stat-card" style="background: linear-gradient(45deg, #3498db, #2980b9);">
+                <div class="stat-number">${data.totalBooks}</div>
+                <div class="stat-label">Livros no Acervo</div>
+              </div>
+              <div class="stat-card" style="background: linear-gradient(45deg, #2ecc71, #27ae60);">
+                <div class="stat-number">${data.availableBooks}</div>
+                <div class="stat-label">Livros Disponíveis</div>
+              </div>
+              <div class="stat-card" style="background: linear-gradient(45deg, #e74c3c, #c0392b);">
+                <div class="stat-number">${data.loanedBooks}</div>
+                <div class="stat-label">Livros Emprestados</div>
+              </div>
+              <div class="stat-card" style="background: linear-gradient(45deg, #f39c12, #e67e22);">
+                <div class="stat-number">${data.utilizationRate}%</div>
+                <div class="stat-label">Taxa de Utilização</div>
+              </div>
+            </div>
+
+            <h4 style="margin-top: 1.5rem; margin-bottom: 1rem;">📚 Distribuição por Categoria</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Categoria</th>
+                  <th style="text-align: center;">Quantidade de Livros</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.categories.map(cat => `
+                  <tr>
+                    <td><strong>${cat.name}</strong></td>
+                    <td style="text-align: center;">
+                      <span class="badge badge-info">${cat.count}</span>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+
+        html += '</div>';
+        reportContent.innerHTML = html;
+
+      } catch(error) {
+        console.error('Erro ao carregar relatório:', error);
+        reportContent.innerHTML = '<p style="text-align: center; color: #e74c3c; padding: 2rem;">Erro ao carregar relatório!</p>';
+      }
+    }
+
+    function renderNotifications() {
+      if(!canAccess(['admin', 'manager', 'librarian']))
+        return '';
+
+      const pendingNotifications = notifications.filter(n => n.status === 'pending');
+      const readNotifications = notifications.filter(n => n.status === 'read');
+      const resolvedNotifications = notifications.filter(n => n.status === 'resolved');
+
+      return `
+        <div class="card">
+          <h2>🔔 Central de Notificações</h2>
+
+          ${pendingNotifications.length === 0 && readNotifications.length === 0 && resolvedNotifications.length === 0 ? `
+            <p style="text-align: center; color: #666; padding: 2rem;">
+              Nenhuma notificação no momento. 😊
+            </p>
+          ` : ''}
+
+          ${pendingNotifications.length > 0 ? `
+            <h3 style="margin-top: 1.5rem; margin-bottom: 1rem; color: #e74c3c;">
+              ⚠️ Notificações Pendentes (${pendingNotifications.length})
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              ${pendingNotifications.map(notification => `
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 8px;">
+                  <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem;">
+                    <div style="flex: 1;">
+                      <strong style="color: #856404; display: block; margin-bottom: 0.5rem;">
+                        ${notification.type === 'overdue' ? '⏰ Empréstimo em Atraso' : '📢 Notificação'}
+                      </strong>
+                      <p style="margin: 0.5rem 0; color: #333;">${notification.message}</p>
+                      <small style="color: #666;">
+                        ${new Date(notification.createdAt).toLocaleString('pt-BR')}
+                      </small>
+                    </div>
+                    <button onclick="markNotificationAsRead(${notification.id})" 
+                            class="btn btn-primary btn-small" 
+                            style="white-space: nowrap;">
+                      Marcar como Lida
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          ${readNotifications.length > 0 ? `
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #3498db;">
+              ✓ Notificações Lidas (${readNotifications.length})
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              ${readNotifications.map(notification => `
+                <div style="background: #d1ecf1; border-left: 4px solid #3498db; padding: 1rem; border-radius: 8px;">
+                  <strong style="color: #0c5460; display: block; margin-bottom: 0.5rem;">
+                    ${notification.type === 'overdue' ? '⏰ Empréstimo em Atraso' : '📢 Notificação'}
+                  </strong>
+                  <p style="margin: 0.5rem 0; color: #333;">${notification.message}</p>
+                  <small style="color: #666;">
+                    Criada em: ${new Date(notification.createdAt).toLocaleString('pt-BR')} | 
+                    Lida em: ${new Date(notification.readAt).toLocaleString('pt-BR')}
+                  </small>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          ${resolvedNotifications.length > 0 ? `
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #2ecc71;">
+              ✅ Notificações Resolvidas (${resolvedNotifications.length})
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              ${resolvedNotifications.slice(0, 10).map(notification => `
+                <div style="background: #d4edda; border-left: 4px solid #2ecc71; padding: 1rem; border-radius: 8px;">
+                  <strong style="color: #155724; display: block; margin-bottom: 0.5rem;">
+                    ${notification.type === 'overdue' ? '⏰ Empréstimo em Atraso (Resolvido)' : '📢 Notificação'}
+                  </strong>
+                  <p style="margin: 0.5rem 0; color: #333;">${notification.message}</p>
+                  <small style="color: #666;">
+                    Resolvida em: ${new Date(notification.resolvedAt).toLocaleString('pt-BR')}
+                  </small>
+                </div>
+              `).join('')}
+              ${resolvedNotifications.length > 10 ? `
+                <p style="text-align: center; color: #666; font-size: 0.9rem;">
+                  Mostrando as 10 notificações mais recentes de ${resolvedNotifications.length} resolvidas
+                </p>
+              ` : ''}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
     function attachEventListeners() {
       const bookForm = document.getElementById('bookForm');
       if(bookForm) {
@@ -1610,6 +1942,23 @@
           handleReserveClick(bookId);
         });
       });
+
+      if(currentUser && canAccess(['admin', 'manager', 'librarian'])) {
+        setTimeout(async () => {
+          const notificationsRes = await fetch('/api/notifications');
+          const newNotifications = await notificationsRes.json();
+          const oldPendingCount = notifications.filter(n => n.status === 'pending').length;
+          const newPendingCount = newNotifications.filter(n => n.status === 'pending').length;
+
+          notifications = newNotifications;
+
+          if(newPendingCount > oldPendingCount && currentSection !== 'notifications')
+            showMessage('Novas notificações de atraso!', 'warning');
+
+          if(currentSection === 'notifications')
+            render();
+        }, 30000);
+      }
     }
 
     document.addEventListener('DOMContentLoaded', init);

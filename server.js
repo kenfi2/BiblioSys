@@ -52,11 +52,13 @@ async function initDatabase()
       ],
       loans: [],
       reservations: [],
+      notifications: [],
       nextId: {
         books: 3,
         members: 3,
         loans: 1,
-        reservations: 1
+        reservations: 1,
+        notifications: 1
       }
     };
     await fs.writeFile(DB_FILE, JSON.stringify(initialData, null, 2));
@@ -84,6 +86,220 @@ async function writeDatabase(data)
     return false;
   }
 }
+
+async function checkOverdueLoans() {
+  const db = await readDatabase();
+  if(!db)
+    return;
+
+  const now = new Date();
+  const systemConfig = {
+    loanDays: 14,
+    toleranceDays: 2
+  };
+
+  for(const loan of db.loans) {
+    if(loan.status !== 'Active')
+      continue;
+
+    const returnDate = new Date(loan.returnDate);
+    const toleranceDate = new Date(returnDate);
+    toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
+
+    if(now > toleranceDate) {
+      const existingNotification = db.notifications.find(n => 
+        n.loanId === loan.id && n.type === 'overdue' && n.status === 'pending'
+      );
+
+      if(!existingNotification) {
+        const notification = {
+          id: db.nextId.notifications++,
+          type: 'overdue',
+          loanId: loan.id,
+          memberId: loan.memberId,
+          memberName: loan.memberName,
+          bookTitle: loan.bookTitle,
+          message: `Empréstimo em atraso: "${loan.bookTitle}" deveria ter sido devolvido em ${returnDate.toLocaleDateString('pt-BR')}`,
+          createdAt: new Date().toISOString(),
+          status: 'pending'
+        };
+
+        db.notifications.push(notification);
+        console.log(`Notificação criada: ${notification.message}`);
+      }
+    }
+  }
+
+  await writeDatabase(db);
+}
+
+app.get('/api/reports/:type', async(req, res) => {
+  const { type } = req.params;
+  const db = await readDatabase();
+  
+  if(!db)
+    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
+
+  try {
+    let report = {};
+
+    switch(type) {
+      case 'most-borrowed':
+        const bookLoans = {};
+        db.loans.forEach(loan => {
+          bookLoans[loan.bookId] = (bookLoans[loan.bookId] || 0) + 1;
+        });
+
+        const sortedBooks = Object.entries(bookLoans)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10)
+          .map(([bookId, count]) => {
+            const book = db.books.find(b => b.id === parseInt(bookId));
+            return {
+              bookId: parseInt(bookId),
+              title: book ? book.title : 'Desconhecido',
+              author: book ? book.author : 'Desconhecido',
+              loanCount: count
+            };
+          });
+
+        report = {
+          type: 'most-borrowed',
+          title: 'Livros Mais Emprestados',
+          data: sortedBooks,
+          generatedAt: new Date().toISOString()
+        };
+        break;
+
+      case 'active-members':
+        const memberLoans = {};
+        db.loans.forEach(loan => {
+          memberLoans[loan.memberId] = (memberLoans[loan.memberId] || 0) + 1;
+        });
+
+        const sortedMembers = Object.entries(memberLoans)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10)
+          .map(([memberId, count]) => {
+            const member = db.members.find(m => m.id === parseInt(memberId));
+            return {
+              memberId: parseInt(memberId),
+              name: member ? member.name : 'Desconhecido',
+              contact: member ? member.contact : 'N/A',
+              loanCount: count,
+              activeLoans: member ? member.activeLoans : 0
+            };
+          });
+
+        report = {
+          type: 'active-members',
+          title: 'Leitores Mais Ativos',
+          data: sortedMembers,
+          generatedAt: new Date().toISOString()
+        };
+        break;
+
+      case 'overdue-summary':
+        const now = new Date();
+        const systemConfig = { toleranceDays: 2 };
+
+        const overdueLoans = db.loans.filter(loan => {
+          if(loan.status !== 'Active') return false;
+          const returnDate = new Date(loan.returnDate);
+          const toleranceDate = new Date(returnDate);
+          toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
+          return now > toleranceDate;
+        }).map(loan => {
+          const returnDate = new Date(loan.returnDate);
+          const toleranceDate = new Date(returnDate);
+          toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
+          const daysOverdue = Math.floor((now - toleranceDate) / (1000 * 60 * 60 * 24));
+
+          return {
+            loanId: loan.id,
+            bookTitle: loan.bookTitle,
+            memberName: loan.memberName,
+            returnDate: loan.returnDate,
+            daysOverdue
+          };
+        });
+
+        report = {
+          type: 'overdue-summary',
+          title: 'Resumo de Atrasos',
+          data: overdueLoans,
+          totalOverdue: overdueLoans.length,
+          generatedAt: new Date().toISOString()
+        };
+        break;
+
+      case 'collection-stats':
+        const totalBooks = db.books.reduce((sum, b) => sum + b.count, 0);
+        const availableBooks = db.books.reduce((sum, b) => sum + b.available, 0);
+        const loanedBooks = totalBooks - availableBooks;
+
+        const categoryCounts = {};
+        db.books.forEach(book => {
+          const cat = book.category || 'Sem categoria';
+          categoryCounts[cat] = (categoryCounts[cat] || 0) + book.count;
+        });
+
+        report = {
+          type: 'collection-stats',
+          title: 'Estatísticas do Acervo',
+          data: {
+            totalBooks,
+            availableBooks,
+            loanedBooks,
+            utilizationRate: ((loanedBooks / totalBooks) * 100).toFixed(1),
+            totalTitles: db.books.length,
+            categories: Object.entries(categoryCounts).map(([name, count]) => ({
+              name,
+              count
+            }))
+          },
+          generatedAt: new Date().toISOString()
+        };
+        break;
+
+      default:
+        return res.status(400).json({error: 'Tipo de relatório inválido'});
+    }
+
+    res.json(report);
+  } catch(error) {
+    console.error('Erro ao gerar relatório:', error);
+    res.status(500).json({error: 'Erro ao gerar relatório'});
+  }
+});
+
+app.get('/api/notifications', async(_, res) => {
+  const db = await readDatabase();
+  if(!db)
+    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
+
+  res.json(db.notifications || []);
+});
+
+app.put('/api/notifications/:id/read', async(req, res) => {
+  const notificationId = parseInt(req.params.id);
+  
+  const db = await readDatabase();
+  if(!db)
+    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
+
+  const notification = db.notifications.find(n => n.id === notificationId);
+  if(!notification)
+    return res.status(404).json({error: 'Notificação não encontrada'});
+
+  notification.status = 'read';
+  notification.readAt = new Date().toISOString();
+
+  if(await writeDatabase(db))
+    res.json(notification);
+  else
+    res.status(500).json({error: 'Erro ao atualizar notificação'});
+});
 
 app.get('/api/books', async(_, res) => {
   const db = await readDatabase();
@@ -239,10 +455,19 @@ app.put('/api/loans/:id/return', async(req, res) => {
   if(member)
     member.activeLoans--;
 
+  if(db.notifications) {
+    db.notifications.forEach(notification => {
+      if(notification.loanId === loanId && notification.status === 'pending') {
+        notification.status = 'resolved';
+        notification.resolvedAt = new Date().toISOString();
+      }
+    });
+  }
+
   const reservation = db.reservations.find(reservation => reservation.bookId === loan.bookId && reservation.status === 'Active');
   if(reservation) {
     reservation.status = 'Notificada';
-    console.log(`Notificação: Livro "${book.title}" está disponível para ${reservation.memberNames}`);
+    console.log(`Notificação: Livro "${book.title}" está disponível para ${reservation.memberName}`);
   }
 
   if(await writeDatabase(db))
@@ -336,14 +561,19 @@ app.use((err, _, res, next) => {
   res.status(500).json({error: 'Erro interno do servidor'});
 });
 
+setInterval(checkOverdueLoans, 5 * 60 * 1000);
+
 async function startServer()
 {
   try {
     console.log('\nStarting server...');
     await initDatabase();
     
+    await checkOverdueLoans();
+
     app.listen(PORT, () => {
       console.log('\nServer started at http://localhost:3000/');
+      console.log('Sistema de notificações de atraso ativado!');
     });
   } catch(error) {
     console.error('Erro ao iniciar servidor:', error);
