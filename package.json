@@ -13,11 +13,13 @@
     "sistema",
     "emprestimos",
     "nodejs",
-    "express"
+    "express",
+    "mysql"
   ],
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "mysql2": "^3.6.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs').promises;
+const db = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -8,262 +8,170 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const DB_FILE = path.join(__dirname, 'database.json');
-
-async function initDatabase()
+async function checkOverdueLoans()
 {
   try {
-    await fs.access(DB_FILE);
-  } catch {
-    const initialData = {
-      books: [
-        {
-          id: 1,
-          title: "Dom Casmurro",
-          author: "Machado de Assis",
-          category: "Literatura Brasileira",
-          count: 3,
-          available: 3
-        },
-        {
-          id: 2,
-          title: "O Pequeno Príncipe",
-          author: "Antoine de Saint-Exupéry",
-          category: "Literatura Infantil",
-          count: 2,
-          available: 2
+    const now = new Date();
+    const systemConfig = { loanDays: 14, toleranceDays: 2 };
+
+    const loans = await db.query('SELECT * FROM loans WHERE status = ?', ['Active']);
+
+    for(const loan of loans) {
+      const returnDate = new Date(loan.return_date);
+      const toleranceDate = new Date(returnDate);
+      toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
+
+      if(now > toleranceDate) {
+        const existing = await db.query(
+          'SELECT * FROM notifications WHERE loan_id = ? AND type = ? AND status = ?',
+          [loan.id, 'overdue', 'pending']
+        );
+
+        if(existing.length === 0) {
+          const [books] = await db.query('SELECT title FROM books WHERE id = ?', [loan.book_id]);
+
+          await db.query(
+            'INSERT INTO notifications (type, loan_id, member_id, message, status) VALUES (?, ?, ?, ?, ?)',
+            [
+              'overdue',
+              loan.id,
+              loan.member_id,
+              `Empréstimo em atraso: "${books[0].title}" deveria ter sido devolvido em ${returnDate.toLocaleDateString('pt-BR')}`,
+              'pending'
+            ]
+          );
         }
-      ],
-      members: [
-        {
-          id: 1,
-          name: "Ana Silva",
-          contact: "(34) 99999-9999",
-          email: "ana@email.com",
-          activeLoans: 0
-        },
-        {
-          id: 2,
-          name: "Carlos Santos",
-          contact: "(34) 88888-8888",
-          email: "carlos@email.com",
-          activeLoans: 0
-        }
-      ],
-      loans: [],
-      reservations: [],
-      notifications: [],
-      nextId: {
-        books: 3,
-        members: 3,
-        loans: 1,
-        reservations: 1,
-        notifications: 1
-      }
-    };
-    await fs.writeFile(DB_FILE, JSON.stringify(initialData, null, 2));
-  }
-}
-
-async function readDatabase()
-{
-  try {
-    const data = await fs.readFile(DB_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch(error) {
-    console.error('Erro ao ler banco de dados:', error);
-    return null;
-  }
-}
-
-async function writeDatabase(data)
-{
-  try {
-    await fs.writeFile(DB_FILE, JSON.stringify(data, null, 2));
-    return true;
-  } catch(error) {
-    console.error('Erro ao escrever no banco de dados:', error);
-    return false;
-  }
-}
-
-async function checkOverdueLoans() {
-  const db = await readDatabase();
-  if(!db)
-    return;
-
-  const now = new Date();
-  const systemConfig = {
-    loanDays: 14,
-    toleranceDays: 2
-  };
-
-  for(const loan of db.loans) {
-    if(loan.status !== 'Active')
-      continue;
-
-    const returnDate = new Date(loan.returnDate);
-    const toleranceDate = new Date(returnDate);
-    toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
-
-    if(now > toleranceDate) {
-      const existingNotification = db.notifications.find(n => 
-        n.loanId === loan.id && n.type === 'overdue' && n.status === 'pending'
-      );
-
-      if(!existingNotification) {
-        const notification = {
-          id: db.nextId.notifications++,
-          type: 'overdue',
-          loanId: loan.id,
-          memberId: loan.memberId,
-          memberName: loan.memberName,
-          bookTitle: loan.bookTitle,
-          message: `Empréstimo em atraso: "${loan.bookTitle}" deveria ter sido devolvido em ${returnDate.toLocaleDateString('pt-BR')}`,
-          createdAt: new Date().toISOString(),
-          status: 'pending'
-        };
-
-        db.notifications.push(notification);
-        console.log(`Notificação criada: ${notification.message}`);
       }
     }
+  } catch(error) {
+    console.error('Erro ao verificar atrasos:', error);
   }
-
-  await writeDatabase(db);
 }
 
 app.get('/api/reports/:type', async(req, res) => {
   const { type } = req.params;
-  const db = await readDatabase();
   
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
-
   try {
     let report = {};
 
-    switch(type) {
-      case 'most-borrowed':
-        const bookLoans = {};
-        db.loans.forEach(loan => {
-          bookLoans[loan.bookId] = (bookLoans[loan.bookId] || 0) + 1;
-        });
+    if(type === 'most-borrowed') {
+      const data = await db.query(`
+        SELECT 
+          b.id as bookId,
+          b.title,
+          b.author,
+          COUNT(l.id) as loanCount
+        FROM books b
+        LEFT JOIN loans l ON b.id = l.book_id
+        GROUP BY b.id
+        ORDER BY loanCount DESC
+        LIMIT 10
+      `);
 
-        const sortedBooks = Object.entries(bookLoans)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 10)
-          .map(([bookId, count]) => {
-            const book = db.books.find(b => b.id === parseInt(bookId));
-            return {
-              bookId: parseInt(bookId),
-              title: book ? book.title : 'Desconhecido',
-              author: book ? book.author : 'Desconhecido',
-              loanCount: count
-            };
-          });
+      report = {
+        type: 'most-borrowed',
+        title: 'Livros Mais Emprestados',
+        data: data,
+        generatedAt: new Date().toISOString()
+      };
+    }
+    else if(type === 'active-members') {
+      const data = await db.query(`
+        SELECT 
+          m.id as memberId,
+          m.name,
+          m.contact,
+          COUNT(l.id) as loanCount,
+          m.active_loans as activeLoans
+        FROM members m
+        LEFT JOIN loans l ON m.id = l.member_id
+        GROUP BY m.id
+        ORDER BY loanCount DESC
+        LIMIT 10
+      `);
 
-        report = {
-          type: 'most-borrowed',
-          title: 'Livros Mais Emprestados',
-          data: sortedBooks,
-          generatedAt: new Date().toISOString()
-        };
-        break;
+      report = {
+        type: 'active-members',
+        title: 'Leitores Mais Ativos',
+        data: data,
+        generatedAt: new Date().toISOString()
+      };
+    }
+    else if(type === 'overdue-summary') {
+      const now = new Date();
+      const systemConfig = { toleranceDays: 2 };
 
-      case 'active-members':
-        const memberLoans = {};
-        db.loans.forEach(loan => {
-          memberLoans[loan.memberId] = (memberLoans[loan.memberId] || 0) + 1;
-        });
+      const loans = await db.query(`
+        SELECT 
+          l.id as loanId,
+          b.title as bookTitle,
+          m.name as memberName,
+          l.return_date as returnDate
+        FROM loans l
+        JOIN books b ON l.book_id = b.id
+        JOIN members m ON l.member_id = m.id
+        WHERE l.status = ?
+      `, ['Active']);
 
-        const sortedMembers = Object.entries(memberLoans)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 10)
-          .map(([memberId, count]) => {
-            const member = db.members.find(m => m.id === parseInt(memberId));
-            return {
-              memberId: parseInt(memberId),
-              name: member ? member.name : 'Desconhecido',
-              contact: member ? member.contact : 'N/A',
-              loanCount: count,
-              activeLoans: member ? member.activeLoans : 0
-            };
-          });
+      const overdueLoans = loans.filter(loan => {
+        const returnDate = new Date(loan.returnDate);
+        const toleranceDate = new Date(returnDate);
+        toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
+        return now > toleranceDate;
+      }).map(loan => {
+        const returnDate = new Date(loan.returnDate);
+        const toleranceDate = new Date(returnDate);
+        toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
+        const daysOverdue = Math.floor((now - toleranceDate) / (1000 * 60 * 60 * 24));
+        return { ...loan, daysOverdue };
+      });
 
-        report = {
-          type: 'active-members',
-          title: 'Leitores Mais Ativos',
-          data: sortedMembers,
-          generatedAt: new Date().toISOString()
-        };
-        break;
+      report = {
+        type: 'overdue-summary',
+        title: 'Resumo de Atrasos',
+        data: overdueLoans,
+        totalOverdue: overdueLoans.length,
+        generatedAt: new Date().toISOString()
+      };
+    }
+    else if(type === 'collection-stats') {
+      const [stats] = await db.query(`
+        SELECT 
+          SUM(count) as totalBooks,
+          SUM(available) as availableBooks
+        FROM books
+      `);
 
-      case 'overdue-summary':
-        const now = new Date();
-        const systemConfig = { toleranceDays: 2 };
+      const categories = await db.query(`
+        SELECT 
+          category as name,
+          SUM(count) as count
+        FROM books
+        GROUP BY category
+      `);
 
-        const overdueLoans = db.loans.filter(loan => {
-          if(loan.status !== 'Active') return false;
-          const returnDate = new Date(loan.returnDate);
-          const toleranceDate = new Date(returnDate);
-          toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
-          return now > toleranceDate;
-        }).map(loan => {
-          const returnDate = new Date(loan.returnDate);
-          const toleranceDate = new Date(returnDate);
-          toleranceDate.setDate(toleranceDate.getDate() + systemConfig.toleranceDays);
-          const daysOverdue = Math.floor((now - toleranceDate) / (1000 * 60 * 60 * 24));
+      const totalTitles = await db.query('SELECT COUNT(*) as count FROM books');
 
-          return {
-            loanId: loan.id,
-            bookTitle: loan.bookTitle,
-            memberName: loan.memberName,
-            returnDate: loan.returnDate,
-            daysOverdue
-          };
-        });
+      const totalBooks = stats.totalBooks || 0;
+      const availableBooks = stats.availableBooks || 0;
+      const loanedBooks = totalBooks - availableBooks;
 
-        report = {
-          type: 'overdue-summary',
-          title: 'Resumo de Atrasos',
-          data: overdueLoans,
-          totalOverdue: overdueLoans.length,
-          generatedAt: new Date().toISOString()
-        };
-        break;
-
-      case 'collection-stats':
-        const totalBooks = db.books.reduce((sum, b) => sum + b.count, 0);
-        const availableBooks = db.books.reduce((sum, b) => sum + b.available, 0);
-        const loanedBooks = totalBooks - availableBooks;
-
-        const categoryCounts = {};
-        db.books.forEach(book => {
-          const cat = book.category || 'Sem categoria';
-          categoryCounts[cat] = (categoryCounts[cat] || 0) + book.count;
-        });
-
-        report = {
-          type: 'collection-stats',
-          title: 'Estatísticas do Acervo',
-          data: {
-            totalBooks,
-            availableBooks,
-            loanedBooks,
-            utilizationRate: ((loanedBooks / totalBooks) * 100).toFixed(1),
-            totalTitles: db.books.length,
-            categories: Object.entries(categoryCounts).map(([name, count]) => ({
-              name,
-              count
-            }))
-          },
-          generatedAt: new Date().toISOString()
-        };
-        break;
-
-      default:
-        return res.status(400).json({error: 'Tipo de relatório inválido'});
+      report = {
+        type: 'collection-stats',
+        title: 'Estatísticas do Acervo',
+        data: {
+          totalBooks,
+          availableBooks,
+          loanedBooks,
+          utilizationRate: totalBooks > 0 ? ((loanedBooks / totalBooks) * 100).toFixed(1) : 0,
+          totalTitles: totalTitles[0].count,
+          categories: categories
+        },
+        generatedAt: new Date().toISOString()
+      };
+    }
+    else {
+      return res.status(400).json({error: 'Tipo de relatório inválido'});
     }
 
     res.json(report);
@@ -274,39 +182,37 @@ app.get('/api/reports/:type', async(req, res) => {
 });
 
 app.get('/api/notifications', async(_, res) => {
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
-
-  res.json(db.notifications || []);
+  try {
+    const notifications = await db.query('SELECT * FROM notifications ORDER BY created_at DESC');
+    res.json(notifications);
+  } catch(error) {
+    res.status(500).json({error: 'Erro ao buscar notificações'});
+  }
 });
 
 app.put('/api/notifications/:id/read', async(req, res) => {
   const notificationId = parseInt(req.params.id);
   
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
+  try {
+    await db.query(
+      'UPDATE notifications SET status = ?, read_at = NOW() WHERE id = ?',
+      ['read', notificationId]
+    );
 
-  const notification = db.notifications.find(n => n.id === notificationId);
-  if(!notification)
-    return res.status(404).json({error: 'Notificação não encontrada'});
-
-  notification.status = 'read';
-  notification.readAt = new Date().toISOString();
-
-  if(await writeDatabase(db))
-    res.json(notification);
-  else
+    const [notification] = await db.query('SELECT * FROM notifications WHERE id = ?', [notificationId]);
+    res.json(notification[0]);
+  } catch(error) {
     res.status(500).json({error: 'Erro ao atualizar notificação'});
+  }
 });
 
 app.get('/api/books', async(_, res) => {
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
-
-  res.json(db.books);
+  try {
+    const books = await db.query('SELECT * FROM books ORDER BY title');
+    res.json(books);
+  } catch(error) {
+    res.status(500).json({error: 'Erro ao buscar livros'});
+  }
 });
 
 app.post('/api/books', async(req, res) => {
@@ -315,33 +221,34 @@ app.post('/api/books', async(req, res) => {
   if(!title || !author || !count)
     return res.status(400).json({error: 'Campos obrigatórios: title, author, count'});
 
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
+  try {
+    const result = await db.query(
+      'INSERT INTO books (title, author, category, count, available) VALUES (?, ?, ?, ?, ?)',
+      [title, author, category || 'Não categorizado', count, count]
+    );
 
-  const book = {
-    id: db.nextId.books++,
-    title,
-    author,
-    category: category || 'Não categorizado',
-    count: parseInt(count),
-    available: parseInt(count)
-  };
-  
-  db.books.push(book);
-  
-  if(await writeDatabase(db))
+    const book = {
+      id: result.insertId,
+      title,
+      author,
+      category: category || 'Não categorizado',
+      count,
+      available: count
+    };
+
     res.status(201).json(book);
-  else
-    res.status(500).json({error: 'Erro ao salvar livro'});
+  } catch(error) {
+    res.status(500).json({error: 'Erro ao cadastrar livro'});
+  }
 });
 
 app.get('/api/members', async(_, res) => {
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
-
-  res.json(db.members);
+  try {
+    const members = await db.query('SELECT * FROM members ORDER BY name');
+    res.json(members);
+  } catch(error) {
+    res.status(500).json({error: 'Erro ao buscar membros'});
+  }
 });
 
 app.post('/api/members', async(req, res) => {
@@ -350,40 +257,55 @@ app.post('/api/members', async(req, res) => {
   if(!name || !contact)
     return res.status(400).json({error: 'Campos obrigatórios: name, contact'});
 
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
+  try {
+    const result = await db.query(
+      'INSERT INTO members (name, contact, email, active_loans) VALUES (?, ?, ?, 0)',
+      [name, contact, email || '']
+    );
 
-  const member = {
-    id: db.nextId.members++,
-    name,
-    contact,
-    email: email || '',
-    activeLoans: 0,
-    registerDate: new Date().toISOString()
-  };
+    const member = {
+      id: result.insertId,
+      name,
+      contact,
+      email: email || '',
+      activeLoans: 0
+    };
 
-  db.members.push(member);
-
-  if(await writeDatabase(db))
     res.status(201).json(member);
-  else
-    res.status(500).json({error: 'Erro ao salvar membro'});
+  } catch(error) {
+    res.status(500).json({error: 'Erro ao cadastrar membro'});
+  }
 });
 
 app.get('/api/loans', async(_, res) => {
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
+  try {
+    const loans = await db.query(`
+      SELECT 
+        l.*,
+        b.title as bookTitle,
+        m.name as memberName
+      FROM loans l
+      JOIN books b ON l.book_id = b.id
+      JOIN members m ON l.member_id = m.id
+      ORDER BY l.loan_date DESC
+    `);
 
-  const completedLoans = db.loans.map(loan => {
-    const book = db.books.find(book => book.id === loan.bookId);
-    const member = db.members.find(member => member.id === loan.memberId);
+    const formattedLoans = loans.map(loan => ({
+      id: loan.id,
+      bookId: loan.book_id,
+      memberId: loan.member_id,
+      bookTitle: loan.bookTitle,
+      memberName: loan.memberName,
+      loanDate: loan.loan_date,
+      returnDate: loan.return_date,
+      returnedDate: loan.returned_date,
+      status: loan.status
+    }));
 
-    return { ...loan, bookTitle: book ? book.title : 'Livro não encontrado', memberName: member ? member.name : 'Membro não encontrado' };
-  });
-
-  res.json(completedLoans);
+    res.json(formattedLoans);
+  } catch(error) {
+    res.status(500).json({error: 'Erro ao buscar empréstimos'});
+  }
 });
 
 app.post('/api/loans', async(req, res) => {
@@ -392,96 +314,134 @@ app.post('/api/loans', async(req, res) => {
   if(!bookId || !memberId)
     return res.status(400).json({error: 'Campos obrigatórios: bookId, memberId'});
 
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
+  const connection = await db.getConnection();
 
-  const book = db.books.find(book => book.id === parseInt(bookId));
-  const member = db.members.find(member => member.id === parseInt(memberId));
+  try {
+    await connection.beginTransaction();
 
-  if(!book || !member)
-    return res.status(404).json({error: 'Livro ou membro não encontrado'});
+    const [books] = await connection.query('SELECT * FROM books WHERE id = ?', [bookId]);
+    const [members] = await connection.query('SELECT * FROM members WHERE id = ?', [memberId]);
 
-  if(book.available <= 0)
-    return res.status(400).json({error: 'Livro não disponível'});
+    if(books.length === 0 || members.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({error: 'Livro ou membro não encontrado'});
+    }
 
-  if(member.activeLoans >= 3)
-    return res.status(400).json({error: 'Limite de empréstimos atingido'});
+    const book = books[0];
+    const member = members[0];
 
-  const loan = {
-    id: db.nextId.loans++,
-    bookId: parseInt(bookId),
-    memberId: parseInt(memberId),
-    bookTitle: book.title,
-    memberName: member.name,
-    loanDate: loanDate,
-    returnDate: returnDate,
-    status: 'Active'
-  };
+    if(book.available <= 0) {
+      await connection.rollback();
+      return res.status(400).json({error: 'Livro não disponível'});
+    }
 
-  book.available--;
-  member.activeLoans++;
+    if(member.active_loans >= 3) {
+      await connection.rollback();
+      return res.status(400).json({error: 'Limite de empréstimos atingido'});
+    }
 
-  db.loans.push(loan);
+    const [result] = await connection.query(
+      'INSERT INTO loans (book_id, member_id, loan_date, return_date, status) VALUES (?, ?, ?, ?, ?)',
+      [bookId, memberId, loanDate, returnDate, 'Active']
+    );
 
-  if(await writeDatabase(db))
+    await connection.query('UPDATE books SET available = available - 1 WHERE id = ?', [bookId]);
+    await connection.query('UPDATE members SET active_loans = active_loans + 1 WHERE id = ?', [memberId]);
+
+    await connection.commit();
+
+    const loan = {
+      id: result.insertId,
+      bookId,
+      memberId,
+      bookTitle: book.title,
+      memberName: member.name,
+      loanDate,
+      returnDate,
+      status: 'Active'
+    };
+
     res.status(201).json(loan);
-  else
+  } catch(error) {
+    await connection.rollback();
     res.status(500).json({error: 'Erro ao registrar empréstimo'});
+  } finally {
+    connection.release();
+  }
 });
 
 app.put('/api/loans/:id/return', async(req, res) => {
   const loanId = parseInt(req.params.id);
+  const connection = await db.getConnection();
 
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
+  try {
+    await connection.beginTransaction();
 
-  const loan = db.loans.find(loan => loan.id === loanId);
-  if(!loan)
-    return res.status(404).json({error: 'Empréstimo não encontrado'});
+    const [loans] = await connection.query('SELECT * FROM loans WHERE id = ?', [loanId]);
 
-  if(loan.status !== 'Active')
-    return res.status(400).json({error: 'Empréstimo já foi devolvido'});
+    if(loans.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({error: 'Empréstimo não encontrado'});
+    }
 
-  loan.status = 'Devolvido';
-  loan.returnRealDate = new Date().toISOString();
+    const loan = loans[0];
 
-  const book = db.books.find(book => book.id === loan.bookId);
-  const member = db.members.find(member => member.id === loan.memberId);
+    if(loan.status !== 'Active') {
+      await connection.rollback();
+      return res.status(400).json({error: 'Empréstimo já foi devolvido'});
+    }
 
-  if(book)
-    book.available++;
-  if(member)
-    member.activeLoans--;
+    await connection.query(
+      'UPDATE loans SET status = ?, returned_date = NOW() WHERE id = ?',
+      ['Devolvido', loanId]
+    );
 
-  if(db.notifications) {
-    db.notifications.forEach(notification => {
-      if(notification.loanId === loanId && notification.status === 'pending') {
-        notification.status = 'resolved';
-        notification.resolvedAt = new Date().toISOString();
-      }
-    });
-  }
+    await connection.query('UPDATE books SET available = available + 1 WHERE id = ?', [loan.book_id]);
+    await connection.query('UPDATE members SET active_loans = active_loans - 1 WHERE id = ?', [loan.member_id]);
 
-  const reservation = db.reservations.find(reservation => reservation.bookId === loan.bookId && reservation.status === 'Active');
-  if(reservation) {
-    reservation.status = 'Notificada';
-    console.log(`Notificação: Livro "${book.title}" está disponível para ${reservation.memberName}`);
-  }
+    await connection.query(
+      'UPDATE notifications SET status = ?, resolved_at = NOW() WHERE loan_id = ? AND status = ?',
+      ['resolved', loanId, 'pending']
+    );
 
-  if(await writeDatabase(db))
-    res.json({message: 'Devolução registrada com sucesso', loan});
-  else
+    await connection.commit();
+
+    res.json({message: 'Devolução registrada com sucesso'});
+  } catch(error) {
+    await connection.rollback();
     res.status(500).json({error: 'Erro ao registrar devolução'});
+  } finally {
+    connection.release();
+  }
 });
 
 app.get('/api/reservations', async(_, res) => {
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
-  
-  res.json(db.reservations);
+  try {
+    const reservations = await db.query(`
+      SELECT 
+        r.*,
+        b.title as bookTitle,
+        m.name as memberName
+      FROM reservations r
+      JOIN books b ON r.book_id = b.id
+      JOIN members m ON r.member_id = m.id
+      ORDER BY r.reservation_date DESC
+    `);
+
+    const formatted = reservations.map(r => ({
+      id: r.id,
+      bookId: r.book_id,
+      memberId: r.member_id,
+      bookTitle: r.bookTitle,
+      memberName: r.memberName,
+      reservationDate: new Date(r.reservation_date).toLocaleDateString('pt-BR'),
+      status: r.status
+    }));
+
+    res.json(formatted);
+  } catch(error) {
+    res.status(500).json({error: 'Erro ao buscar reservas'});
+  }
 });
 
 app.post('/api/reservations', async(req, res) => {
@@ -490,66 +450,63 @@ app.post('/api/reservations', async(req, res) => {
   if(!bookId || !memberId)
     return res.status(400).json({error: 'Campos obrigatórios: bookId, memberId'});
 
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({error: 'Erro ao acessar banco de dados'});
+  try {
+    const existing = await db.query(
+      'SELECT * FROM reservations WHERE book_id = ? AND member_id = ? AND status = ?',
+      [bookId, memberId, 'Active']
+    );
 
-  const book = db.books.find(book => book.id === parseInt(bookId));
-  const member = db.members.find(member => member.id === parseInt(memberId));
+    if(existing.length > 0)
+      return res.status(400).json({error: 'Já existe uma reserva ativa para este livro'});
 
-  if(!book || !member)
-    return res.status(404).json({error: 'Livro ou membro não encontrado'});
+    const [books] = await db.query('SELECT * FROM books WHERE id = ?', [bookId]);
+    const [members] = await db.query('SELECT * FROM members WHERE id = ?', [memberId]);
 
-  const reservationExists = db.reservations.find(r => 
-    r.bookId === parseInt(bookId) && 
-    r.memberId === parseInt(memberId) && 
-    r.status === 'Active'
-  );
+    if(books.length === 0 || members.length === 0)
+      return res.status(404).json({error: 'Livro ou membro não encontrado'});
 
-  if(reservationExists)
-    return res.status(400).json({error: 'Já existe uma reserva ativa para este livro'});
+    const result = await db.query(
+      'INSERT INTO reservations (book_id, member_id, status) VALUES (?, ?, ?)',
+      [bookId, memberId, 'Active']
+    );
 
-  const reservation = {
-    id: db.nextId.reservations++,
-    bookId: parseInt(bookId),
-    memberId: parseInt(memberId),
-    bookTitle: book.title,
-    memberName: member.name,
-    reservationDate: new Date().toISOString(),
-    status: 'Active'
-  };
+    const reservation = {
+      id: result.insertId,
+      bookId,
+      memberId,
+      bookTitle: books[0].title,
+      memberName: members[0].name,
+      reservationDate: new Date().toLocaleDateString('pt-BR'),
+      status: 'Active'
+    };
 
-  db.reservations.push(reservation);
-
-  if(await writeDatabase(db))
     res.status(201).json(reservation);
-  else
+  } catch(error) {
     res.status(500).json({error: 'Erro ao criar reserva'});
+  }
 });
 
 app.put('/api/reservations/:id/cancel', async(req, res) => {
   const reservationId = parseInt(req.params.id);
   
   if(!reservationId)
-    return res.status(400).json({ error: 'ID da reserva é obrigatório' });
+    return res.status(400).json({error: 'ID da reserva é obrigatório'});
 
-  const db = await readDatabase();
-  if(!db)
-    return res.status(500).json({ error: 'Erro ao acessar banco de dados' });
+  try {
+    const [reservations] = await db.query('SELECT * FROM reservations WHERE id = ?', [reservationId]);
 
-  const reservation = db.reservations.find(r => r.id === reservationId);
-  if(!reservation)
-    return res.status(404).json({ error: 'Reserva não encontrada' });
+    if(reservations.length === 0)
+      return res.status(404).json({error: 'Reserva não encontrada'});
 
-  if(reservation.status !== 'Active')
-    return res.status(400).json({ error: 'Só é possível cancelar reservas ativas' });
+    if(reservations[0].status !== 'Active')
+      return res.status(400).json({error: 'Só é possível cancelar reservas ativas'});
 
-  reservation.status = 'Cancelled';
+    await db.query('UPDATE reservations SET status = ? WHERE id = ?', ['Cancelled', reservationId]);
 
-  if(await writeDatabase(db))
-    res.json(reservation);
-  else
-    res.status(500).json({ error: 'Erro ao cancelar reserva' });
+    res.json({...reservations[0], status: 'Cancelled'});
+  } catch(error) {
+    res.status(500).json({error: 'Erro ao cancelar reserva'});
+  }
 });
 
 app.get('/', (_, res) => {
@@ -567,8 +524,7 @@ async function startServer()
 {
   try {
     console.log('\nStarting server...');
-    await initDatabase();
-    
+    await db.init();
     await checkOverdueLoans();
 
     app.listen(PORT, () => {
@@ -581,7 +537,14 @@ async function startServer()
   }
 }
 
-process.on('SIGINT', () => { process.exit(0); });
-process.on('SIGTERM', () => { process.exit(0); });
+process.on('SIGINT', async() => { 
+  await db.close();
+  process.exit(0); 
+});
+
+process.on('SIGTERM', async() => { 
+  await db.close();
+  process.exit(0); 
+});
 
 startServer();
